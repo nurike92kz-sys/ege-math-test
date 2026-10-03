@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Проверка первой части • Профильный ЕГЭ по математике</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              500: '#4f46e5',
+              600: '#4338ca',
+              700: '#3730a3',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Плавные переходы и стили скролла */
+    input[type=number]::-webkit-inner-spin-button, 
+    input[type=number]::-webkit-outer-spin-button { 
+      -webkit-appearance: none; 
+      margin: 0; 
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen antialiased flex flex-col justify-between selection:bg-brand-100 selection:text-brand-700">
+
+  <!-- Верхняя шапка -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-indigo-500 text-white flex items-center justify-center font-bold text-lg shadow-sm">
+          ∑
+        </div>
+        <div>
+          <h1 class="text-base sm:text-lg font-bold text-slate-900 leading-tight">Проверка 1 части</h1>
+          <p class="text-xs text-slate-500">Профильный ЕГЭ по математике</p>
+        </div>
+      </div>
+      <div class="flex items-center space-x-2">
+        <button id="openTeacherModalBtn" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-indigo-600 bg-slate-100 hover:bg-indigo-50 border border-slate-200 transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          <span>Ключи ответов</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Основной контейнер -->
+  <main class="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8 w-full flex-1">
+
+    <!-- Информационная плашка варианта и ученика -->
+    <div class="bg-white rounded-2xl shadow-xs border border-slate-200/80 p-5 sm:p-6 mb-6">
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="sm:col-span-2">
+          <label for="studentName" class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
+            Имя и фамилия ученика
+          </label>
+          <input 
+            type="text" 
+            id="studentName" 
+            placeholder="Например, Александр Иванов" 
+            class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-sm bg-slate-50/50 hover:bg-white focus:bg-white transition-all placeholder:text-slate-400"
+          >
+        </div>
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
+            Номер варианта
+          </label>
+          <div class="flex items-center">
+            <span id="variantBadge" class="inline-flex items-center px-4 py-2.5 w-full rounded-xl bg-indigo-50 text-indigo-700 font-semibold text-sm border border-indigo-100">
+              Вариант №1
+            </span>
+          </div>
+        </div>
+      </div>
+      <div class="mt-4 pt-4 border-t border-slate-100 text-xs text-slate-500 flex items-center justify-between">
+        <span>Задания 1–12 • 1 первичный балл за каждый правильный ответ</span>
+        <span class="text-indigo-600 font-medium hidden sm:inline">Дроби можно вводить через точку или запятую</span>
+      </div>
+    </div>
+
+    <!-- Форма ввода ответов -->
+    <form id="answersForm" class="space-y-6">
+      <div class="bg-white rounded-2xl shadow-xs border border-slate-200/80 p-5 sm:p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
+            <span>Бланк ответов</span>
+            <span class="text-xs font-normal text-slate-400">(вводите целое число или десятичную дробь)</span>
+          </h2>
+          <span class="text-xs text-slate-500" id="filledCounter">Заполнено: 0 / 12</span>
+        </div>
+
+        <!-- Сетка 1-12 заданий -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4" id="inputsGrid">
+          <!-- Генерируется скриптом -->
+        </div>
+
+        <div id="validationAlert" class="hidden mt-4 p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-800 text-xs sm:text-sm flex items-center gap-2">
+          <svg class="w-5 h-5 shrink-0 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+          <span id="validationAlertText">Пожалуйста, укажите имя ученика и проверьте заполнение всех ответов.</span>
+        </div>
+
+        <div class="mt-6 flex flex-col sm:flex-row items-center gap-3">
+          <button 
+            type="submit" 
+            class="w-full sm:w-auto px-8 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-semibold text-sm transition-all shadow-md shadow-indigo-600/20 hover:shadow-indigo-600/30 flex items-center justify-center gap-2"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <span>Проверить ответы</span>
+          </button>
+          
+          <button 
+            type="button" 
+            id="clearAllBtn"
+            class="w-full sm:w-auto px-5 py-3 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 text-sm font-medium transition-colors"
+          >
+            Очистить форму
+          </button>
+        </div>
+      </div>
+    </form>
+
+    <!-- Блок результатов (скрыт по умолчанию) -->
+    <section id="resultSection" class="hidden mt-8 space-y-6">
+      
+      <!-- Карточки со счетом -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+        
+        <!-- Первичный балл -->
+        <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs relative overflow-hidden">
+          <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Первичный балл</div>
+          <div class="flex items-baseline gap-2">
+            <span id="primaryScoreDisplay" class="text-4xl font-extrabold text-slate-900">0</span>
+            <span class="text-slate-400 font-semibold text-lg">/ 12</span>
+          </div>
+          <div class="mt-2 text-xs text-slate-500">1 первичный = 1 решенная задача</div>
+        </div>
+
+        <!-- Тестовый балл -->
+        <div class="bg-gradient-to-br from-indigo-600 to-indigo-700 text-white rounded-2xl p-5 shadow-md shadow-indigo-500/15 relative overflow-hidden">
+          <div class="text-xs font-semibold text-indigo-100 uppercase tracking-wider mb-1">Вторичный балл ЕГЭ</div>
+          <div class="flex items-baseline gap-2">
+            <span id="scaleScoreDisplay" class="text-4xl font-extrabold tracking-tight">0</span>
+            <span class="text-indigo-200 font-semibold text-lg">/ 70</span>
+          </div>
+          <div class="mt-2 text-xs text-indigo-100" id="thresholdBadge">
+            Порог (27 баллов): Проверен
+          </div>
+        </div>
+
+        <!-- Процент успешности -->
+        <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs relative overflow-hidden sm:col-span-2 md:col-span-1">
+          <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Точность 1 части</div>
+          <div class="flex items-baseline gap-2">
+            <span id="percentScoreDisplay" class="text-4xl font-extrabold text-slate-900">0%</span>
+          </div>
+          <div class="w-full bg-slate-100 h-2 rounded-full mt-3 overflow-hidden">
+            <div id="progressBar" class="bg-emerald-500 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Детальный разбор по номерам -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-xs p-5 sm:p-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 mb-4 border-b border-slate-100 gap-3">
+          <div>
+            <h3 class="font-bold text-slate-900 text-base">Подробный разбор заданий</h3>
+            <p class="text-xs text-slate-500">Сверка вашего ответа с критериями проверки</p>
+          </div>
+          <button 
+            id="copyReportBtn" 
+            class="inline-flex items-center gap-2 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-medium transition shadow-xs active:scale-95"
+          >
+            <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+            <span>Скопировать отчет для учителя</span>
+          </button>
+        </div>
+
+        <div id="detailedBreakdown" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          <!-- Генерируется скриптом -->
+        </div>
+
+        <div id="copyNotice" class="hidden mt-4 p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs rounded-xl text-center font-medium">
+          Отчет успешно скопирован в буфер обмена! Можно вставить и отправить в Telegram.
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Модальное окно настройки правильных ответов (Панель преподавателя) -->
+  <div id="teacherModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 hidden">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl border border-slate-200 relative">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div>
+          <h3 class="text-base font-bold text-slate-900">Панель ключей (Преподаватель)</h3>
+          <p class="text-xs text-slate-500">Задайте эталонные ответы для варианта</p>
+        </div>
+        <button id="closeTeacherModalBtn" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <div class="mt-4 space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Название / Номер варианта</label>
+          <input type="text" id="teacherVariantName" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500" placeholder="Вариант №1 (Сентябрьский пробник)">
+        </div>
+
+        <div>
+          <div class="flex justify-between items-center mb-1">
+            <label class="block text-xs font-semibold text-slate-600">Ключи к заданиям 1–12</label>
+            <span class="text-[11px] text-slate-400">Через запятую или пробел</span>
+          </div>
+          <textarea 
+            id="teacherKeysInput" 
+            rows="3" 
+            class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm font-mono focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 placeholder:text-slate-300"
+            placeholder="5, 12, 0.75, 4, -2, 18, 0.5, 9, 3, 1.25, 6, -4"
+          ></textarea>
+        </div>
+
+        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/70 text-xs text-slate-600 space-y-1">
+          <div class="font-medium text-slate-700">Подсказка:</div>
+          <p>Значения сохраняются локально в вашем браузере. Вы также можете отправить ученикам готовую ссылку с ключами в параметре URL: <code class="bg-white px-1.5 py-0.5 rounded border border-slate-200 text-indigo-600">?keys=5,12,0.75...&var=1</code></p>
+        </div>
+
+        <div class="flex gap-2 justify-end pt-2">
+          <button id="resetDefaultKeysBtn" class="px-3.5 py-2 text-xs font-semibold text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition">
+            Сброс к умолчанию
+          </button>
+          <button id="saveTeacherKeysBtn" class="px-5 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition shadow-xs">
+            Сохранить ключи
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Футер -->
+  <footer class="bg-white border-t border-slate-200 py-4 mt-8">
+    <div class="max-w-4xl mx-auto px-4 text-center text-xs text-slate-400">
+      Шкала перевода баллов соответствует спецификации ФИПИ для 1-й части профильного ЕГЭ.
+    </div>
+  </footer>
+
+  <script>
+    // Официальная шкала перевода первой части профильного ЕГЭ:
+    // Индекс массива соответствует первичному баллу (0 - 12)
+    const PRIMARY_TO_SCALE = [0, 6, 11, 17, 22, 27, 34, 40, 46, 52, 58, 64, 70];
+    const PASSING_PRIMARY_THRESHOLD = 5; // 27 тестовых баллов
+
+    // Эталонные ответы по умолчанию (демо-вариант)
+    const DEFAULT_KEYS = ["4", "16", "0.5", "6", "2", "15", "0.25", "8", "-3", "12", "5", "-1"];
+    let currentKeys = [...DEFAULT_KEYS];
+    let currentVariantTitle = "Вариант №1";
+
+    // DOM Элементы
+    const inputsGrid = document.getElementById('inputsGrid');
+    const answersForm = document.getElementById('answersForm');
+    const studentNameInput = document.getElementById('studentName');
+    const variantBadge = document.getElementById('variantBadge');
+    const filledCounter = document.getElementById('filledCounter');
+    const validationAlert = document.getElementById('validationAlert');
+    const validationAlertText = document.getElementById('validationAlertText');
+    const clearAllBtn = document.getElementById('clearAllBtn');
+    
+    // Результаты
+    const resultSection = document.getElementById('resultSection');
+    const primaryScoreDisplay = document.getElementById('primaryScoreDisplay');
+    const scaleScoreDisplay = document.getElementById('scaleScoreDisplay');
+    const percentScoreDisplay = document.getElementById('percentScoreDisplay');
+    const progressBar = document.getElementById('progressBar');
+    const thresholdBadge = document.getElementById('thresholdBadge');
+    const detailedBreakdown = document.getElementById('detailedBreakdown');
+    const copyReportBtn = document.getElementById('copyReportBtn');
+    const copyNotice = document.getElementById('copyNotice');
+
+    // Модальное окно преподавателя
+    const teacherModal = document.getElementById('teacherModal');
+    const openTeacherModalBtn = document.getElementById('openTeacherModalBtn');
+    const closeTeacherModalBtn = document.getElementById('closeTeacherModalBtn');
+    const saveTeacherKeysBtn = document.getElementById('saveTeacherKeysBtn');
+    const resetDefaultKeysBtn = document.getElementById('resetDefaultKeysBtn');
+    const teacherVariantName = document.getElementById('teacherVariantName');
+    const teacherKeysInput = document.getElementById('teacherKeysInput');
+
+    // Нормализация числового ответа для надежного сравнения
+    function normalizeAnswer(val) {
+      if (typeof val !== 'string') val = String(val || '');
+      let clean = val.trim().replace(/\s+/g, '').replace(',', '.');
+      if (clean === '') return '';
+      // Если это валидное число, приводим к каноническому виду (убираем лишние нули: 0.50 -> 0.5)
+      const num = Number(clean);
+      if (!isNaN(num) && clean !== '.' && clean !== '-') {
+        return String(num);
+      }
+      return clean.toLowerCase();
+    }
+
+    // Инициализация полей 1–12 в бланке
+    function renderInputGrid() {
+      inputsGrid.innerHTML = '';
+      for (let i = 1; i <= 12; i++) {
+        const card = document.createElement('div');
+        card.className = "p-3 rounded-xl border border-slate-200 bg-slate-50/50 hover:border-slate-300 transition-colors focus-within:border-indigo-500 focus-within:bg-white focus-within:ring-2 focus-within:ring-indigo-500/10";
+        card.innerHTML = `
+          <div class="flex items-center justify-between mb-1.5">
+            <span class="text-xs font-bold text-slate-700">№ ${i}</span>
+            <span class="text-[10px] text-slate-400 font-medium">1 балл</span>
+          </div>
+          <input 
+            type="text" 
+            inputmode="decimal" 
+            data-index="${i - 1}"
+            id="ans-${i}"
+            placeholder="Ответ" 
+            class="answer-input w-full px-2.5 py-1.5 text-sm font-semibold text-slate-800 bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500 transition-all placeholder:text-slate-300 placeholder:font-normal"
+          />
+        `;
+        inputsGrid.appendChild(card);
+      }
+
+      // Слушатели на автоформат и счетчик
+      const inputs = document.querySelectorAll('.answer-input');
+      inputs.forEach(input => {
+        input.addEventListener('input', updateFilledCount);
+      });
+    }
+
+    // Обновление счетчика заполненных заданий
+    function updateFilledCount() {
+      const inputs = document.querySelectorAll('.answer-input');
+      let count = 0;
+      inputs.forEach(inp => {
+        if (inp.value.trim() !== '') count++;
+      });
+      filledCounter.textContent = `Заполнено: ${count} / 12`;
+    }
+
+    // Загрузка настроек (из URL параметров или localStorage)
+    function loadKeysAndVariant() {
+      const params = new URLSearchParams(window.location.search);
+      const urlKeys = params.get('keys');
+      const urlVar = params.get('var');
+
+      if (urlKeys) {
+        const parsed = urlKeys.split(',').map(s => s.trim()).filter(Boolean);
+        if (parsed.length === 12) {
+          currentKeys = parsed;
+        }
+      } else {
+        const savedKeys = localStorage.getItem('ege_math_keys');
+        if (savedKeys) {
+          try {
+            const parsed = JSON.parse(savedKeys);
+            if (Array.isArray(parsed) && parsed.length === 12) {
+              currentKeys = parsed;
+            }
+          } catch (e) {}
+        }
+      }
+
+      if (urlVar) {
+        currentVariantTitle = `Вариант №${urlVar}`;
+      } else {
+        const savedTitle = localStorage.getItem('ege_math_variant_title');
+        if (savedTitle) {
+          currentVariantTitle = savedTitle;
+        }
+      }
+
+      variantBadge.textContent = currentVariantTitle;
+    }
+
+    // Проверка ответов
+    answersForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      validationAlert.classList.add('hidden');
+
+      const name = studentNameInput.value.trim();
+      const inputs = document.querySelectorAll('.answer-input');
+      
+      const userAnswers = [];
+      let emptyCount = 0;
+
+      inputs.forEach((inp, idx) => {
+        const val = inp.value.trim();
+        userAnswers.push(val);
+        if (!val) emptyCount++;
+      });
+
+      // Мягкое предупреждение о пустых полях
+      if (emptyCount > 0) {
+        validationAlertText.textContent = `Внимание: пропущено заданий: ${emptyCount}. Они будут засчитаны как неверные.`;
+        validationAlert.classList.remove('hidden');
+      }
+
+      // Подсчет результатов
+      let primaryScore = 0;
+      const breakdown = [];
+
+      userAnswers.forEach((ans, idx) => {
+        const userNorm = normalizeAnswer(ans);
+        const correctNorm = normalizeAnswer(currentKeys[idx]);
+        const isCorrect = userNorm !== '' && userNorm === correctNorm;
+
+        if (isCorrect) primaryScore++;
+
+        breakdown.push({
+          taskNum: idx + 1,
+          userAnswer: ans || '—',
+          correctAnswer: currentKeys[idx],
+          isCorrect
+        });
+      });
+
+      // Перевод в тестовый балл
+      const scaleScore = PRIMARY_TO_SCALE[primaryScore] || 0;
+      const percent = Math.round((primaryScore / 12) * 100);
+
+      // Отрисовка результатов
+      primaryScoreDisplay.textContent = primaryScore;
+      scaleScoreDisplay.textContent = scaleScore;
+      percentScoreDisplay.textContent = `${percent}%`;
+      progressBar.style.width = `${percent}%`;
+
+      // Статус порога
+      if (primaryScore >= PASSING_PRIMARY_THRESHOLD) {
+        thresholdBadge.innerHTML = `<span class="inline-flex items-center gap-1 font-semibold text-emerald-200">✓ Порог пройден (мин. 27 баллов)</span>`;
+      } else {
+        thresholdBadge.innerHTML = `<span class="inline-flex items-center gap-1 font-semibold text-rose-200">⚠ Порог не набран (нужно от 27 б.)</span>`;
+      }
+
+      // Генерация карточек детального разбора
+      detailedBreakdown.innerHTML = '';
+      breakdown.forEach(item => {
+        const itemCard = document.createElement('div');
+        itemCard.className = `p-3 rounded-xl border flex items-center justify-between text-xs ${
+          item.isCorrect 
+            ? 'bg-emerald-50/60 border-emerald-200 text-emerald-900' 
+            : 'bg-rose-50/60 border-rose-200 text-rose-900'
+        }`;
+
+        itemCard.innerHTML = `
+          <div class="flex items-center gap-2.5">
+            <span class="w-6 h-6 rounded-lg font-bold flex items-center justify-center text-xs ${
+              item.isCorrect ? 'bg-emerald-200 text-emerald-800' : 'bg-rose-200 text-rose-800'
+            }">
+              ${item.taskNum}
+            </span>
+            <div>
+              <div class="font-semibold">Ответ: <span class="font-mono text-sm">${item.userAnswer}</span></div>
+              ${!item.isCorrect ? `<div class="text-[11px] text-slate-500">Ключ: <span class="font-mono font-medium text-slate-700">${item.correctAnswer}</span></div>` : ''}
+            </div>
+          </div>
+          <div>
+            ${item.isCorrect 
+              ? `<span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-emerald-600 text-white font-bold text-xs">✓</span>` 
+              : `<span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-rose-600 text-white font-bold text-xs">✕</span>`
+            }
+          </div>
+        `;
+        detailedBreakdown.appendChild(itemCard);
+      });
+
+      // Показ блока
+      resultSection.classList.remove('hidden');
+      resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+      // Сохраняем состояние для генерации отчета
+      window.lastReportData = {
+        name: name || 'Ученик',
+        variant: currentVariantTitle,
+        primary: primaryScore,
+        scale: scaleScore,
+        breakdown
+      };
+    });
+
+    // Очистить все
+    clearAllBtn.addEventListener('click', () => {
+      document.querySelectorAll('.answer-input').forEach(i => i.value = '');
+      studentNameInput.value = '';
+      resultSection.classList.add('hidden');
+      validationAlert.classList.add('hidden');
+      updateFilledCount();
+    });
+
+    // Копирование отчета для учителя
+    copyReportBtn.addEventListener('click', () => {
+      if (!window.lastReportData) return;
+      const data = window.lastReportData;
+
+      const correctTasks = data.breakdown.filter(t => t.isCorrect).map(t => t.taskNum);
+      const wrongTasks = data.breakdown.filter(t => !t.isCorrect).map(t => `${t.taskNum} (отв: ${t.userAnswer})`);
+
+      const text = `📊 Результат пробника ЕГЭ (Математика Профиль)
+👤 Ученик: ${data.name}
+📋 ${data.variant}
+
+🎯 Первичный балл: ${data.primary} / 12
+🔥 Вторичный балл: ${data.scale} / 70
+
+✅ Верно [${correctTasks.length}]: ${correctTasks.length ? correctTasks.join(', ') : 'нет'}
+❌ Ошибки [${wrongTasks.length}]: ${wrongTasks.length ? wrongTasks.join('; ') : 'нет'}
+`;
+
+      // Надежное копирование без внешних зависимостей
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.select();
+      try {
+        document.execCommand('copy');
+        copyNotice.classList.remove('hidden');
+        setTimeout(() => copyNotice.classList.add('hidden'), 4000);
+      } catch (err) {
+        alert('Не удалось скопировать. Пожалуйста, выделите текст вручную.');
+      }
+      document.body.removeChild(textarea);
+    });
+
+    // Модальное окно преподавателя
+    openTeacherModalBtn.addEventListener('click', () => {
+      teacherVariantName.value = currentVariantTitle;
+      teacherKeysInput.value = currentKeys.join(', ');
+      teacherModal.classList.remove('hidden');
+    });
+
+    closeTeacherModalBtn.addEventListener('click', () => {
+      teacherModal.classList.add('hidden');
+    });
+
+    saveTeacherKeysBtn.addEventListener('click', () => {
+      const rawText = teacherKeysInput.value;
+      const parsed = rawText.split(/[,\s]+/).map(s => s.trim()).filter(Boolean);
+
+      if (parsed.length !== 12) {
+        alert(`Нужно ввести ровно 12 ответов! Сейчас введено: ${parsed.length}`);
+        return;
+      }
+
+      currentKeys = parsed;
+      currentVariantTitle = teacherVariantName.value.trim() || 'Вариант №1';
+
+      localStorage.setItem('ege_math_keys', JSON.stringify(currentKeys));
+      localStorage.setItem('ege_math_variant_title', currentVariantTitle);
+
+      variantBadge.textContent = currentVariantTitle;
+      teacherModal.classList.add('hidden');
+      
+      // Сброс результатов проверки при смене ключей
+      resultSection.classList.add('hidden');
+    });
+
+    resetDefaultKeysBtn.addEventListener('click', () => {
+      currentKeys = [...DEFAULT_KEYS];
+      currentVariantTitle = "Вариант №1";
+      teacherVariantName.value = currentVariantTitle;
+      teacherKeysInput.value = currentKeys.join(', ');
+      localStorage.removeItem('ege_math_keys');
+      localStorage.removeItem('ege_math_variant_title');
+      variantBadge.textContent = currentVariantTitle;
+    });
+
+    // Старт
+    loadKeysAndVariant();
+    renderInputGrid();
+    updateFilledCount();
+  </script>
+</body>
+</html>
