@@ -54,20 +54,19 @@
       </div>
 
       <div class="flex items-center gap-2">
-        <!-- Кнопка дашборда преподавателя -->
+        <!-- Скрытые кнопки управления (видны только при ?teacher=1) -->
         <button 
           id="toggleTeacherViewBtn" 
-          class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-indigo-600 bg-slate-100 hover:bg-indigo-50 border border-slate-200 transition-colors"
+          class="hidden inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-indigo-600 bg-slate-100 hover:bg-indigo-50 border border-slate-200 transition-colors"
         >
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
           <span id="teacherBtnText">Журнал учителя</span>
         </button>
 
-        <!-- Кнопка настроек ключей -->
         <button 
           id="openTeacherModalBtn" 
           title="Настройка эталонных ключей" 
-          class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+          class="hidden p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
         >
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
         </button>
@@ -217,7 +216,7 @@
             class="w-full sm:w-auto px-8 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-semibold text-sm transition-all shadow-md shadow-indigo-600/20 hover:shadow-indigo-600/30 flex items-center justify-center gap-2 cursor-pointer"
           >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            <span>Проверить ответы</span>
+            <span id="submitBtnText">Сдать на проверку</span>
           </button>
           
           <button 
@@ -281,11 +280,11 @@
 
       </div>
 
-      <!-- Детальный разбор по номерам 1-13 -->
+      <!-- Детальный разбор по номерам 1-13 (БЕЗ РАСКРЫТИЯ ВЕРНЫХ КЛЮЧЕЙ) -->
       <div class="bg-white rounded-2xl border border-slate-200 shadow-xs p-5 sm:p-6">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 mb-4 border-b border-slate-100 gap-3">
           <div>
-            <h3 class="font-bold text-slate-900 text-base">Сверка ответов с бланком</h3>
+            <h3 class="font-bold text-slate-900 text-base">Результат по заданиям</h3>
             <p class="text-xs text-slate-500">Зеленый — зачет (1 балл), красный — ошибка или пропуск</p>
           </div>
           <button 
@@ -377,7 +376,7 @@
   <footer class="bg-white border-t border-slate-200 py-4 mt-8">
     <div class="max-w-5xl mx-auto px-4 text-center text-xs text-slate-400 flex flex-col sm:flex-row items-center justify-between gap-2">
       <span>Шкала перевода баллов: ФИПИ (13 заданий первой части профильного ЕГЭ, максимум 72 б.)</span>
-      <span class="text-slate-500">GitHub Pages Ready • Автосохранение в Supabase</span>
+      <span class="text-slate-500">Автопроверка и фиксация попытки</span>
     </div>
   </footer>
 
@@ -387,7 +386,7 @@
        1. КОНФИГУРАЦИЯ БАЗЫ ДАННЫХ SUPABASE
        ========================================================================== */
     const SUPABASE_URL = 'https://ioswqaurllohiokvjxjh.supabase.co';
-    // ВСТАВЬТЕ СЮДА ВАШ АНОНИМНЫЙ КЛЮЧ (anon public) ИЗ SUPABASE:
+    // ВСТАВЬТЕ СЮДА ВАШ АНОНИМНЫЙ КЛЮЧ (anon public) ИЗ ВКЛАДКИ LEGACY API KEYS В SUPABASE:
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlvc3dxYXVybGxvaGlva3ZqeGpoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEwMTIxMDIsImV4cCI6MjEwNjU4ODEwMn0.TifObaD1hsyog69RO_R8mJEQljgg9gj-SNIO-h6Z3m4';
 
     const isSupabaseConfigured = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY && SUPABASE_ANON_KEY.trim() !== '');
@@ -422,6 +421,8 @@
     const validationAlert = document.getElementById('validationAlert');
     const validationAlertText = document.getElementById('validationAlertText');
     const clearAllBtn = document.getElementById('clearAllBtn');
+    const submitAnswersBtn = document.getElementById('submitAnswersBtn');
+    const submitBtnText = document.getElementById('submitBtnText');
 
     // Элементы результатов
     const resultSection = document.getElementById('resultSection');
@@ -443,6 +444,7 @@
     // Элементы панели преподавателя
     const teacherDashboardSection = document.getElementById('teacherDashboardSection');
     const toggleTeacherViewBtn = document.getElementById('toggleTeacherViewBtn');
+    const openTeacherModalBtn = document.getElementById('openTeacherModalBtn');
     const closeTeacherDashboardBtn = document.getElementById('closeTeacherDashboardBtn');
     const refreshDashboardBtn = document.getElementById('refreshDashboardBtn');
     const teacherTableBody = document.getElementById('teacherTableBody');
@@ -453,7 +455,6 @@
 
     // Модалка настройки ключей
     const teacherModal = document.getElementById('teacherModal');
-    const openTeacherModalBtn = document.getElementById('openTeacherModalBtn');
     const closeTeacherModalBtn = document.getElementById('closeTeacherModalBtn');
     const saveTeacherKeysBtn = document.getElementById('saveTeacherKeysBtn');
     const resetDefaultKeysBtn = document.getElementById('resetDefaultKeysBtn');
@@ -584,7 +585,7 @@
     }
 
     /* ==========================================================================
-       4. ПРОВЕРКА ОТВЕТОВ
+       4. ПРОВЕРКА ОТВЕТОВ И БЛОКИРОВКА ПОВТОРНОГО ВВОДА
        ========================================================================== */
     answersForm.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -639,6 +640,16 @@
         validationAlert.classList.remove('hidden');
       }
 
+      // БЛОКИРОВКА: запрещаем повторный ввод и клики
+      inputs.forEach(inp => inp.disabled = true);
+      studentNameInput.disabled = true;
+      clearAllBtn.disabled = true;
+      clearAllBtn.classList.add('opacity-50', 'cursor-not-allowed');
+      submitAnswersBtn.disabled = true;
+      submitBtnText.textContent = '✓ Работа сдана';
+      submitAnswersBtn.classList.remove('bg-indigo-600', 'hover:bg-indigo-700');
+      submitAnswersBtn.classList.add('bg-slate-500', 'cursor-not-allowed');
+
       const scaleScore = PRIMARY_TO_SCALE[primaryScore] || 0;
       const percent = Math.round((primaryScore / 13) * 100);
 
@@ -648,6 +659,7 @@
       progressBar.style.width = `${percent}%`;
       thresholdBadge.innerHTML = getStatusBadge(primaryScore, scaleScore);
 
+      // Отрисовка списка заданий (КЛЮЧИ НЕ ПОКАЗЫВАЮТСЯ УЧЕНИКУ)
       detailedBreakdown.innerHTML = '';
       breakdown.forEach(item => {
         const itemCard = document.createElement('div');
@@ -665,8 +677,11 @@
               ${item.taskNum}
             </span>
             <div>
-              <div class="font-semibold">Ответ: <span class="font-mono text-sm">${item.userAnswer}</span></div>
-              ${!item.isCorrect ? `<div class="text-[11px] text-slate-500">Ключ: <span class="font-mono font-medium text-slate-700">${item.correctAnswer}</span></div>` : ''}
+              <div class="font-semibold">Ваш ответ: <span class="font-mono text-sm">${item.userAnswer}</span></div>
+              ${!item.isCorrect 
+                ? `<div class="text-[11px] text-rose-600 font-medium">Ответ неверный (0 б.)</div>` 
+                : `<div class="text-[11px] text-emerald-600 font-medium">Верно (1 б.)</div>`
+              }
             </div>
           </div>
           <div>
@@ -721,39 +736,37 @@
         localStorage.setItem('ege_local_attempts', JSON.stringify(localLogs.slice(0, 50)));
       } catch (e) {}
 
-      // Проверка ключа перед отправкой
       if (!isSupabaseConfigured || !supabaseClient) {
-        alert('⚠️ Внимание:\nВ строке 325 не указан SUPABASE_ANON_KEY!\nДанные сейчас сохранились только в браузере.');
         cloudStatusDot.className = 'w-2 h-2 rounded-full bg-slate-400';
-        cloudStatusText.textContent = 'Ключ Supabase не заполнен (локальный режим)';
+        cloudStatusText.textContent = 'Локальный режим (ключ базы не настроен)';
         return;
       }
 
       try {
-        const { data, error } = await supabaseClient
+        const { error } = await supabaseClient
           .from('student_results')
           .insert([payload]);
 
         if (error) {
-          alert('❌ Ошибка ответа Supabase:\n' + error.message + '\nДетали: ' + (error.details || error.hint || 'Проверьте таблицу'));
+          console.error('Ошибка Supabase:', error);
           cloudStatusDot.className = 'w-2 h-2 rounded-full bg-rose-500';
-          cloudStatusText.textContent = 'Ошибка Supabase: ' + error.message;
+          cloudStatusText.textContent = 'Ошибка сохранения: ' + error.message;
           return;
         }
 
         cloudStatusDot.className = 'w-2 h-2 rounded-full bg-emerald-500';
-        cloudStatusText.textContent = 'Результат успешно доставлен в Supabase!';
+        cloudStatusText.textContent = 'Работа принята и записана в журнал учителя';
         cloudSyncTimestamp.textContent = new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
 
       } catch (err) {
-        alert('💥 Ошибка соединения с сервером:\n' + err.message);
+        console.error('Сетевой сбой:', err);
         cloudStatusDot.className = 'w-2 h-2 rounded-full bg-rose-500';
-        cloudStatusText.textContent = 'Сетевой сбой при отправке';
+        cloudStatusText.textContent = 'Сбой сети при отправке';
       }
     }
 
     /* ==========================================================================
-       6. ДАШБОРД ПРЕПОДАВАТЕЛЯ
+       6. ДАШБОРД ПРЕПОДАВАТЕЛЯ (ДОСТУПЕН ПО ?teacher=1)
        ========================================================================== */
     async function loadTeacherDashboard() {
       teacherTableBody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-400">Загрузка данных из журнала...</td></tr>`;
@@ -761,7 +774,7 @@
       if (isSupabaseConfigured && supabaseClient) {
         statDbStatus.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500"></span> Supabase подключен`;
       } else {
-        statDbStatus.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-400"></span> Локальный режим (нет ключа)`;
+        statDbStatus.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-400"></span> Локальный демо-режим`;
       }
 
       let attempts = [];
@@ -902,7 +915,7 @@
       const data = window.lastReportData;
 
       const correctList = data.breakdown.filter(t => t.isCorrect).map(t => t.taskNum);
-      const wrongList = data.errorDetails.map(t => `№${t.q} (ввел: ${t.user})`);
+      const wrongList = data.errorDetails.map(t => `№${t.q}`);
 
       const text = `📊 Пробник ЕГЭ (Математика Профиль) — Часть 1
 👤 Ученик: ${data.name}
@@ -912,7 +925,7 @@
 🔥 Вторичный балл: ${data.scale} / 72
 
 ✅ Верно (${correctList.length}): ${correctList.length ? correctList.join(', ') : 'нет'}
-❌ Ошибки (${wrongList.length}): ${wrongList.length ? wrongList.join('; ') : 'нет'}
+❌ Ошибки (${wrongList.length}): ${wrongList.length ? wrongList.join(', ') : 'нет'}
 `;
 
       const ta = document.createElement('textarea');
@@ -981,6 +994,7 @@
       setTimeout(() => copyShareLinkBtn.textContent = 'Копировать ссылку', 2500);
     });
 
+    // Активация панели учителя, если в ссылке есть ?teacher=1 или ?admin=true
     window.addEventListener('DOMContentLoaded', () => {
       loadKeysAndVariant();
       renderInputGrid();
@@ -988,6 +1002,8 @@
 
       const urlParams = new URLSearchParams(window.location.search);
       if (urlParams.get('teacher') === '1' || urlParams.get('admin') === 'true') {
+        toggleTeacherViewBtn.classList.remove('hidden');
+        openTeacherModalBtn.classList.remove('hidden');
         teacherDashboardSection.classList.remove('hidden');
         loadTeacherDashboard();
       }
