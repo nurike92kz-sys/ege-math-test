@@ -388,12 +388,12 @@
        Вставьте сюда URL и Anon Key из настроек вашего проекта Supabase:
        Project Settings -> API -> Project URL & Project API Keys (anon public)
        ========================================================================== */
-    const SUPABASE_URL = 'https://ioswqaurllohiokvjxjh.supabase.co/rest/v1/';
+    const SUPABASE_URL = 'https://ioswqaurllohiokvjxjh.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlvc3dxYXVybGxvaGlva3ZqeGpoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEwMTIxMDIsImV4cCI6MjEwNjU4ODEwMn0.TifObaD1hsyog69RO_R8mJEQljgg9gj-SNIO-h6Z3m4';
 
     // Проверка, заполнены ли реальные ключи (иначе включается безопасный локальный режим)
     const isSupabaseConfigured = 
-      SUPABASE_URL !== 'https://ioswqaurllohiokvjxjh.supabase.co/rest/v1/' && 
+      SUPABASE_URL !== 'https://ioswqaurllohiokvjxjh.supabase.co' && 
       SUPABASE_ANON_KEY !== 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlvc3dxYXVybGxvaGlva3ZqeGpoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEwMTIxMDIsImV4cCI6MjEwNjU4ODEwMn0.TifObaD1hsyog69RO_R8mJEQljgg9gj-SNIO-h6Z3m4';
 
     let supabaseClient = null;
