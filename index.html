@@ -3,9 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Проверка первой части • Профильный ЕГЭ по математике</title>
+  <title>Проверка 1-й части • Профильный ЕГЭ по математике</title>
+  
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Supabase JS Client v2 CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <script>
     tailwind.config = {
       theme: {
@@ -27,7 +31,6 @@
     }
   </script>
   <style>
-    /* Плавные переходы и стили скролла */
     input[type=number]::-webkit-inner-spin-button, 
     input[type=number]::-webkit-outer-spin-button { 
       -webkit-appearance: none; 
@@ -37,86 +40,181 @@
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans min-h-screen antialiased flex flex-col justify-between selection:bg-brand-100 selection:text-brand-700">
 
-  <!-- Верхняя шапка -->
+  <!-- ================= ВЕРХНЯЯ ШАПКА ================= -->
   <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between">
       <div class="flex items-center space-x-3">
         <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-indigo-500 text-white flex items-center justify-center font-bold text-lg shadow-sm">
           ∑
         </div>
         <div>
-          <h1 class="text-base sm:text-lg font-bold text-slate-900 leading-tight">Проверка 1 части</h1>
-          <p class="text-xs text-slate-500">Профильный ЕГЭ по математике</p>
+          <h1 class="text-base sm:text-lg font-bold text-slate-900 leading-tight">Проверка 1-й части</h1>
+          <p class="text-xs text-slate-500">Профильный ЕГЭ (Задания 1–13)</p>
         </div>
       </div>
-      <div class="flex items-center space-x-2">
-        <button id="openTeacherModalBtn" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-indigo-600 bg-slate-100 hover:bg-indigo-50 border border-slate-200 transition-colors">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-          <span>Ключи ответов</span>
+
+      <div class="flex items-center gap-2">
+        <!-- Кнопка дашборда преподавателя -->
+        <button 
+          id="toggleTeacherViewBtn" 
+          class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-indigo-600 bg-slate-100 hover:bg-indigo-50 border border-slate-200 transition-colors"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+          <span id="teacherBtnText">Журнал учителя</span>
+        </button>
+
+        <!-- Кнопка настроек ключей -->
+        <button 
+          id="openTeacherModalBtn" 
+          title="Настройка эталонных ключей" 
+          class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
         </button>
       </div>
     </div>
   </header>
 
-  <!-- Основной контейнер -->
-  <main class="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8 w-full flex-1">
+  <!-- ================= ОСНОВНОЙ КОНТЕНТ ================= -->
+  <main class="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8 w-full flex-1 space-y-6">
 
-    <!-- Информационная плашка варианта и ученика -->
-    <div class="bg-white rounded-2xl shadow-xs border border-slate-200/80 p-5 sm:p-6 mb-6">
+    <!-- ПАНЕЛЬ ПРЕПОДАВАТЕЛЯ (ДАШБОРД / ЖУРНАЛ СДАЧИ) -->
+    <section id="teacherDashboardSection" class="hidden bg-white rounded-2xl shadow-xs border border-indigo-100 p-5 sm:p-6 space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-3">
+        <div>
+          <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 mb-1">
+            Панель преподавателя
+          </div>
+          <h2 class="text-lg font-bold text-slate-900">Журнал результатов и аналитика ошибок</h2>
+        </div>
+        <div class="flex items-center gap-2">
+          <button 
+            id="refreshDashboardBtn" 
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-700 hover:text-indigo-600 bg-slate-100 hover:bg-indigo-50 transition border border-slate-200"
+          >
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+            <span>Обновить журнал</span>
+          </button>
+          <button 
+            id="closeTeacherDashboardBtn" 
+            class="text-xs px-3 py-1.5 rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-50 transition"
+          >
+            Скрыть журнал
+          </button>
+        </div>
+      </div>
+
+      <!-- Сводная аналитика -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/70">
+          <div class="text-xs text-slate-500 font-medium">Всего проверок</div>
+          <div id="statTotalAttempts" class="text-2xl font-black text-slate-900 mt-1">0</div>
+        </div>
+        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/70">
+          <div class="text-xs text-slate-500 font-medium">Средний первичный балл</div>
+          <div id="statAvgScore" class="text-2xl font-black text-indigo-600 mt-1">0 / 13</div>
+        </div>
+        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/70">
+          <div class="text-xs text-slate-500 font-medium">Статус подключения к облаку</div>
+          <div id="statDbStatus" class="text-xs font-bold text-slate-700 mt-2 flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-slate-300"></span> Инициализация...
+          </div>
+        </div>
+      </div>
+
+      <!-- Тепловая карта проблемных заданий 1-13 -->
+      <div class="p-4 rounded-xl bg-slate-50/70 border border-slate-200/80">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs font-bold text-slate-700">Частота ошибок по номерам заданий:</span>
+          <span class="text-[11px] text-slate-400">Красный = частые ошибки</span>
+        </div>
+        <div id="taskErrorHeatmap" class="grid grid-cols-5 sm:grid-cols-7 md:grid-cols-13 gap-2">
+          <!-- Генерируется скриптом -->
+        </div>
+      </div>
+
+      <!-- Таблица результатов -->
+      <div class="overflow-x-auto rounded-xl border border-slate-200">
+        <table class="w-full text-left text-xs">
+          <thead class="bg-slate-100/80 text-slate-600 font-semibold border-b border-slate-200">
+            <tr>
+              <th class="p-3">Дата/Время</th>
+              <th class="p-3">Ученик</th>
+              <th class="p-3">Вариант</th>
+              <th class="p-3">Первичный</th>
+              <th class="p-3">Вторичный</th>
+              <th class="p-3">Ошибки (в каких заданиях)</th>
+            </tr>
+          </thead>
+          <tbody id="teacherTableBody" class="divide-y divide-slate-100 font-normal">
+            <tr>
+              <td colspan="6" class="p-4 text-center text-slate-400">Загрузка данных...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ИНФОРМАЦИОННАЯ КАРТОЧКА ВАРИАНТА И УЧЕНИКА -->
+    <div class="bg-white rounded-2xl shadow-xs border border-slate-200/80 p-5 sm:p-6">
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div class="sm:col-span-2">
           <label for="studentName" class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
-            Имя и фамилия ученика
+            Имя и фамилия ученика <span class="text-rose-500">*</span>
           </label>
           <input 
             type="text" 
             id="studentName" 
             placeholder="Например, Александр Иванов" 
-            class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-sm bg-slate-50/50 hover:bg-white focus:bg-white transition-all placeholder:text-slate-400"
+            autocomplete="name"
+            class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-sm bg-slate-50/50 hover:bg-white focus:bg-white transition-all placeholder:text-slate-400 font-medium"
           >
         </div>
         <div>
           <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
-            Номер варианта
+            Вариант
           </label>
           <div class="flex items-center">
-            <span id="variantBadge" class="inline-flex items-center px-4 py-2.5 w-full rounded-xl bg-indigo-50 text-indigo-700 font-semibold text-sm border border-indigo-100">
+            <span id="variantBadge" class="inline-flex items-center px-4 py-2.5 w-full rounded-xl bg-indigo-50 text-indigo-700 font-semibold text-sm border border-indigo-100 truncate">
               Вариант №1
             </span>
           </div>
         </div>
       </div>
-      <div class="mt-4 pt-4 border-t border-slate-100 text-xs text-slate-500 flex items-center justify-between">
-        <span>Задания 1–12 • 1 первичный балл за каждый правильный ответ</span>
-        <span class="text-indigo-600 font-medium hidden sm:inline">Дроби можно вводить через точку или запятую</span>
+      <div class="mt-4 pt-4 border-t border-slate-100 text-xs text-slate-500 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+        <span>Задания 1–13 • 1 первичный балл за каждый верный ответ</span>
+        <span class="text-indigo-600 font-medium">Дроби можно вводить через запятую или точку</span>
       </div>
     </div>
 
-    <!-- Форма ввода ответов -->
+    <!-- ФОРМА ВВОДА ОТВЕТОВ 1-13 -->
     <form id="answersForm" class="space-y-6">
       <div class="bg-white rounded-2xl shadow-xs border border-slate-200/80 p-5 sm:p-6">
         <div class="flex items-center justify-between mb-4">
           <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
             <span>Бланк ответов</span>
-            <span class="text-xs font-normal text-slate-400">(вводите целое число или десятичную дробь)</span>
+            <span class="text-xs font-normal text-slate-400 hidden sm:inline">(число или десятичная дробь)</span>
           </h2>
-          <span class="text-xs text-slate-500" id="filledCounter">Заполнено: 0 / 12</span>
+          <span class="text-xs text-slate-500 font-medium" id="filledCounter">Заполнено: 0 / 13</span>
         </div>
 
-        <!-- Сетка 1-12 заданий -->
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4" id="inputsGrid">
-          <!-- Генерируется скриптом -->
+        <!-- Сетка 1-13 заданий -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3" id="inputsGrid">
+          <!-- Генерируется динамически через JS -->
         </div>
 
+        <!-- Предупреждение валидации -->
         <div id="validationAlert" class="hidden mt-4 p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-800 text-xs sm:text-sm flex items-center gap-2">
           <svg class="w-5 h-5 shrink-0 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-          <span id="validationAlertText">Пожалуйста, укажите имя ученика и проверьте заполнение всех ответов.</span>
+          <span id="validationAlertText">Пожалуйста, укажите имя ученика перед проверкой.</span>
         </div>
 
+        <!-- Кнопки отправки -->
         <div class="mt-6 flex flex-col sm:flex-row items-center gap-3">
           <button 
             type="submit" 
-            class="w-full sm:w-auto px-8 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-semibold text-sm transition-all shadow-md shadow-indigo-600/20 hover:shadow-indigo-600/30 flex items-center justify-center gap-2"
+            id="submitAnswersBtn"
+            class="w-full sm:w-auto px-8 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-semibold text-sm transition-all shadow-md shadow-indigo-600/20 hover:shadow-indigo-600/30 flex items-center justify-center gap-2 cursor-pointer"
           >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
             <span>Проверить ответы</span>
@@ -127,45 +225,54 @@
             id="clearAllBtn"
             class="w-full sm:w-auto px-5 py-3 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 text-sm font-medium transition-colors"
           >
-            Очистить форму
+            Очистить поля
           </button>
         </div>
       </div>
     </form>
 
-    <!-- Блок результатов (скрыт по умолчанию) -->
-    <section id="resultSection" class="hidden mt-8 space-y-6">
+    <!-- БЛОК РЕЗУЛЬТАТОВ (ОТРИСОВЫВАЕТСЯ ПОСЛЕ СДАЧИ) -->
+    <section id="resultSection" class="hidden space-y-6">
       
+      <!-- Статус сохранения в облако -->
+      <div id="cloudSyncStatus" class="p-3 rounded-xl text-xs flex items-center justify-between border bg-slate-50 border-slate-200">
+        <span class="flex items-center gap-2">
+          <span id="cloudStatusDot" class="w-2 h-2 rounded-full bg-amber-400"></span>
+          <span id="cloudStatusText">Отправка результатов в базу учителя...</span>
+        </span>
+        <span class="text-slate-400 text-[11px]" id="cloudSyncTimestamp"></span>
+      </div>
+
       <!-- Карточки со счетом -->
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
         
         <!-- Первичный балл -->
-        <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs relative overflow-hidden">
+        <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs relative">
           <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Первичный балл</div>
           <div class="flex items-baseline gap-2">
-            <span id="primaryScoreDisplay" class="text-4xl font-extrabold text-slate-900">0</span>
-            <span class="text-slate-400 font-semibold text-lg">/ 12</span>
+            <span id="primaryScoreDisplay" class="text-4xl font-black text-slate-900">0</span>
+            <span class="text-slate-400 font-semibold text-lg">/ 13</span>
           </div>
-          <div class="mt-2 text-xs text-slate-500">1 первичный = 1 решенная задача</div>
+          <div class="mt-2 text-xs text-slate-500">1 балл за каждую решенную задачу</div>
         </div>
 
-        <!-- Тестовый балл -->
-        <div class="bg-gradient-to-br from-indigo-600 to-indigo-700 text-white rounded-2xl p-5 shadow-md shadow-indigo-500/15 relative overflow-hidden">
+        <!-- Вторичный (тестовый) балл -->
+        <div class="bg-gradient-to-br from-indigo-600 to-indigo-700 text-white rounded-2xl p-5 shadow-md shadow-indigo-500/15 relative">
           <div class="text-xs font-semibold text-indigo-100 uppercase tracking-wider mb-1">Вторичный балл ЕГЭ</div>
           <div class="flex items-baseline gap-2">
-            <span id="scaleScoreDisplay" class="text-4xl font-extrabold tracking-tight">0</span>
-            <span class="text-indigo-200 font-semibold text-lg">/ 70</span>
+            <span id="scaleScoreDisplay" class="text-4xl font-black tracking-tight">0</span>
+            <span class="text-indigo-200 font-semibold text-lg">/ 72</span>
           </div>
-          <div class="mt-2 text-xs text-indigo-100" id="thresholdBadge">
-            Порог (27 баллов): Проверен
+          <div class="mt-2 text-xs font-medium" id="thresholdBadge">
+            Проверка порогов...
           </div>
         </div>
 
-        <!-- Процент успешности -->
-        <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs relative overflow-hidden sm:col-span-2 md:col-span-1">
-          <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Точность 1 части</div>
+        <!-- Точность первой части -->
+        <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs sm:col-span-2 md:col-span-1">
+          <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Точность 1-й части</div>
           <div class="flex items-baseline gap-2">
-            <span id="percentScoreDisplay" class="text-4xl font-extrabold text-slate-900">0%</span>
+            <span id="percentScoreDisplay" class="text-4xl font-black text-slate-900">0%</span>
           </div>
           <div class="w-full bg-slate-100 h-2 rounded-full mt-3 overflow-hidden">
             <div id="progressBar" class="bg-emerald-500 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
@@ -174,28 +281,28 @@
 
       </div>
 
-      <!-- Детальный разбор по номерам -->
+      <!-- Детальный разбор по номерам 1-13 -->
       <div class="bg-white rounded-2xl border border-slate-200 shadow-xs p-5 sm:p-6">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 mb-4 border-b border-slate-100 gap-3">
           <div>
-            <h3 class="font-bold text-slate-900 text-base">Подробный разбор заданий</h3>
-            <p class="text-xs text-slate-500">Сверка вашего ответа с критериями проверки</p>
+            <h3 class="font-bold text-slate-900 text-base">Сверка ответов с бланком</h3>
+            <p class="text-xs text-slate-500">Зеленый — зачет (1 балл), красный — ошибка или пропуск</p>
           </div>
           <button 
             id="copyReportBtn" 
             class="inline-flex items-center gap-2 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-medium transition shadow-xs active:scale-95"
           >
             <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
-            <span>Скопировать отчет для учителя</span>
+            <span>Скопировать отчет для Telegram</span>
           </button>
         </div>
 
-        <div id="detailedBreakdown" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        <div id="detailedBreakdown" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
           <!-- Генерируется скриптом -->
         </div>
 
         <div id="copyNotice" class="hidden mt-4 p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs rounded-xl text-center font-medium">
-          Отчет успешно скопирован в буфер обмена! Можно вставить и отправить в Telegram.
+          ✓ Текст отчета скопирован! Теперь можно вставить сообщение репетитору в диалог.
         </div>
       </div>
 
@@ -203,13 +310,13 @@
 
   </main>
 
-  <!-- Модальное окно настройки правильных ответов (Панель преподавателя) -->
+  <!-- МОДАЛЬНОЕ ОКНО ПРЕПОДАВАТЕЛЯ (РЕДАКТОР КЛЮЧЕЙ И ВАРИАНТОВ) -->
   <div id="teacherModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 hidden">
     <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl border border-slate-200 relative">
       <div class="flex items-center justify-between pb-3 border-b border-slate-100">
         <div>
-          <h3 class="text-base font-bold text-slate-900">Панель ключей (Преподаватель)</h3>
-          <p class="text-xs text-slate-500">Задайте эталонные ответы для варианта</p>
+          <h3 class="text-base font-bold text-slate-900">Настройка эталонных ключей</h3>
+          <p class="text-xs text-slate-500">Задайте верные ответы для текущего варианта</p>
         </div>
         <button id="closeTeacherModalBtn" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -219,25 +326,39 @@
       <div class="mt-4 space-y-4">
         <div>
           <label class="block text-xs font-semibold text-slate-600 mb-1">Название / Номер варианта</label>
-          <input type="text" id="teacherVariantName" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500" placeholder="Вариант №1 (Сентябрьский пробник)">
+          <input 
+            type="text" 
+            id="teacherVariantName" 
+            class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500" 
+            placeholder="Вариант №1 (Сентябрьский пробник)"
+          >
         </div>
 
         <div>
           <div class="flex justify-between items-center mb-1">
-            <label class="block text-xs font-semibold text-slate-600">Ключи к заданиям 1–12</label>
-            <span class="text-[11px] text-slate-400">Через запятую или пробел</span>
+            <label class="block text-xs font-semibold text-slate-600">Ключи к заданиям 1–13</label>
+            <span class="text-[11px] text-slate-400">Через пробел или запятую</span>
           </div>
           <textarea 
             id="teacherKeysInput" 
             rows="3" 
             class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm font-mono focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 placeholder:text-slate-300"
-            placeholder="5, 12, 0.75, 4, -2, 18, 0.5, 9, 3, 1.25, 6, -4"
+            placeholder="4, 16, 0.5, 6, 2, 15, 0.25, 8, -3, 12, 5, -1, 14"
           ></textarea>
         </div>
 
-        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/70 text-xs text-slate-600 space-y-1">
-          <div class="font-medium text-slate-700">Подсказка:</div>
-          <p>Значения сохраняются локально в вашем браузере. Вы также можете отправить ученикам готовую ссылку с ключами в параметре URL: <code class="bg-white px-1.5 py-0.5 rounded border border-slate-200 text-indigo-600">?keys=5,12,0.75...&var=1</code></p>
+        <!-- Генератор ссылок -->
+        <div class="bg-indigo-50/70 p-3 rounded-xl border border-indigo-100 text-xs text-indigo-900 space-y-2">
+          <div class="font-bold flex items-center justify-between">
+            <span>Ссылка на этот вариант для учеников:</span>
+            <button id="copyShareLinkBtn" type="button" class="text-indigo-600 hover:text-indigo-800 underline font-medium">Копировать ссылку</button>
+          </div>
+          <input 
+            type="text" 
+            readonly 
+            id="shareableLinkInput" 
+            class="w-full px-2.5 py-1.5 bg-white border border-indigo-200 rounded-lg text-slate-600 font-mono text-[11px] select-all"
+          >
         </div>
 
         <div class="flex gap-2 justify-end pt-2">
@@ -252,21 +373,48 @@
     </div>
   </div>
 
-  <!-- Футер -->
+  <!-- ФУТЕР -->
   <footer class="bg-white border-t border-slate-200 py-4 mt-8">
-    <div class="max-w-4xl mx-auto px-4 text-center text-xs text-slate-400">
-      Шкала перевода баллов соответствует спецификации ФИПИ для 1-й части профильного ЕГЭ (13 заданий).
+    <div class="max-w-5xl mx-auto px-4 text-center text-xs text-slate-400 flex flex-col sm:flex-row items-center justify-between gap-2">
+      <span>Шкала перевода баллов: ФИПИ (13 заданий первой части профильного ЕГЭ, максимум 72 б.)</span>
+      <span class="text-slate-500">GitHub Pages Ready • Автосохранение в Supabase</span>
     </div>
   </footer>
 
+  <!-- ================= ЛОГИКА ПРИЛОЖЕНИЯ ================= -->
   <script>
-    // Официальная шкала перевода первой части профильного ЕГЭ для 13 заданий:
-    // Индекс массива соответствует первичному баллу (0 - 13)
-    const PRIMARY_TO_SCALE = [0, 6, 11, 17, 22, 27, 34, 40, 46, 52, 58, 64, 70, 72];
-    const PASSING_CERTIFICATE_THRESHOLD = 5; // 27 баллов (порог сдачи на аттестат)
-    const PASSING_UNIVERSITY_THRESHOLD = 7;  // 40 баллов (порог Минобрнауки для вузов)
+    /* ==========================================================================
+       1. КОНФИГУРАЦИЯ БАЗЫ ДАННЫХ SUPABASE
+       Вставьте сюда URL и Anon Key из настроек вашего проекта Supabase:
+       Project Settings -> API -> Project URL & Project API Keys (anon public)
+       ========================================================================== */
+    const SUPABASE_URL = 'https://ioswqaurllohiokvjxjh.supabase.co/rest/v1/';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlvc3dxYXVybGxvaGlva3ZqeGpoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEwMTIxMDIsImV4cCI6MjEwNjU4ODEwMn0.TifObaD1hsyog69RO_R8mJEQljgg9gj-SNIO-h6Z3m4';
 
-    // Эталонные ответы по умолчанию для 13 заданий
+    // Проверка, заполнены ли реальные ключи (иначе включается безопасный локальный режим)
+    const isSupabaseConfigured = 
+      SUPABASE_URL !== 'https://ioswqaurllohiokvjxjh.supabase.co/rest/v1/' && 
+      SUPABASE_ANON_KEY !== 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlvc3dxYXVybGxvaGlva3ZqeGpoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEwMTIxMDIsImV4cCI6MjEwNjU4ODEwMn0.TifObaD1hsyog69RO_R8mJEQljgg9gj-SNIO-h6Z3m4';
+
+    let supabaseClient = null;
+    if (isSupabaseConfigured && window.supabase) {
+      try {
+        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      } catch (err) {
+        console.warn('Не удалось инициализировать клиент Supabase:', err);
+      }
+    }
+
+    /* ==========================================================================
+       2. ШКАЛА ПЕРЕВОДА И КЛЮЧИ ПО УМОЛЧАНИЮ (13 ЗАДАНИЙ)
+       ========================================================================== */
+    // Индекс в массиве = первичный балл (0..13)
+    // Значение = вторичный (тестовый) балл ФИПИ
+    const PRIMARY_TO_SCALE = [0, 6, 11, 17, 22, 27, 34, 40, 46, 52, 58, 64, 70, 72];
+    const PASSING_CERTIFICATE_THRESHOLD = 5; // 27 баллов (порог аттестата)
+    const PASSING_UNIVERSITY_THRESHOLD = 7;  // 40 баллов (порог вузов)
+
+    // Ключи по умолчанию для пробника (13 штук)
     const DEFAULT_KEYS = ["4", "16", "0.5", "6", "2", "15", "0.25", "8", "-3", "12", "5", "-1", "14"];
     let currentKeys = [...DEFAULT_KEYS];
     let currentVariantTitle = "Вариант №1";
@@ -280,8 +428,8 @@
     const validationAlert = document.getElementById('validationAlert');
     const validationAlertText = document.getElementById('validationAlertText');
     const clearAllBtn = document.getElementById('clearAllBtn');
-    
-    // Результаты
+
+    // Элементы результатов
     const resultSection = document.getElementById('resultSection');
     const primaryScoreDisplay = document.getElementById('primaryScoreDisplay');
     const scaleScoreDisplay = document.getElementById('scaleScoreDisplay');
@@ -292,7 +440,24 @@
     const copyReportBtn = document.getElementById('copyReportBtn');
     const copyNotice = document.getElementById('copyNotice');
 
-    // Модальное окно преподавателя
+    // Элементы синхронизации с базой
+    const cloudSyncStatus = document.getElementById('cloudSyncStatus');
+    const cloudStatusDot = document.getElementById('cloudStatusDot');
+    const cloudStatusText = document.getElementById('cloudStatusText');
+    const cloudSyncTimestamp = document.getElementById('cloudSyncTimestamp');
+
+    // Элементы панели преподавателя
+    const teacherDashboardSection = document.getElementById('teacherDashboardSection');
+    const toggleTeacherViewBtn = document.getElementById('toggleTeacherViewBtn');
+    const closeTeacherDashboardBtn = document.getElementById('closeTeacherDashboardBtn');
+    const refreshDashboardBtn = document.getElementById('refreshDashboardBtn');
+    const teacherTableBody = document.getElementById('teacherTableBody');
+    const statTotalAttempts = document.getElementById('statTotalAttempts');
+    const statAvgScore = document.getElementById('statAvgScore');
+    const statDbStatus = document.getElementById('statDbStatus');
+    const taskErrorHeatmap = document.getElementById('taskErrorHeatmap');
+
+    // Модалка настройки ключей
     const teacherModal = document.getElementById('teacherModal');
     const openTeacherModalBtn = document.getElementById('openTeacherModalBtn');
     const closeTeacherModalBtn = document.getElementById('closeTeacherModalBtn');
@@ -300,21 +465,25 @@
     const resetDefaultKeysBtn = document.getElementById('resetDefaultKeysBtn');
     const teacherVariantName = document.getElementById('teacherVariantName');
     const teacherKeysInput = document.getElementById('teacherKeysInput');
+    const shareableLinkInput = document.getElementById('shareableLinkInput');
+    const copyShareLinkBtn = document.getElementById('copyShareLinkBtn');
 
-    // Нормализация числового ответа для надежного сравнения
+    /* ==========================================================================
+       3. ФУНКЦИИ НОРМАЛИЗАЦИИ И ПОДГОТОВКИ
+       ========================================================================== */
+    // Приводим пользовательский ввод к чистому числовому виду (запятые -> точки, удаление пробелов)
     function normalizeAnswer(val) {
       if (typeof val !== 'string') val = String(val || '');
       let clean = val.trim().replace(/\s+/g, '').replace(',', '.');
       if (clean === '') return '';
-      // Если это валидное число, приводим к каноническому виду (убираем незначащие нули: 0.50 -> 0.5)
       const num = Number(clean);
       if (!isNaN(num) && clean !== '.' && clean !== '-') {
-        return String(num);
+        return String(num); // 0.50 -> "0.5"
       }
       return clean.toLowerCase();
     }
 
-    // Инициализация полей 1–13 в бланке
+    // Рендер полей 1–13
     function renderInputGrid() {
       inputsGrid.innerHTML = '';
       for (let i = 1; i <= 13; i++) {
@@ -337,7 +506,7 @@
         inputsGrid.appendChild(card);
       }
 
-      // Слушатели на автоформат, счетчик и навигацию
+      // Слушатели на ввод и навигацию по клавишам
       const inputs = document.querySelectorAll('.answer-input');
       inputs.forEach((input, index) => {
         input.addEventListener('input', updateFilledCount);
@@ -358,7 +527,6 @@
       });
     }
 
-    // Обновление счетчика заполненных заданий
     function updateFilledCount() {
       const inputs = document.querySelectorAll('.answer-input');
       let count = 0;
@@ -368,7 +536,7 @@
       filledCounter.textContent = `Заполнено: ${count} / 13`;
     }
 
-    // Загрузка настроек (из URL параметров или localStorage)
+    // Загрузка ключей и варианта из URL параметров или localStorage
     function loadKeysAndVariant() {
       const params = new URLSearchParams(window.location.search);
       const urlKeys = params.get('keys');
@@ -401,16 +569,23 @@
       }
 
       variantBadge.textContent = currentVariantTitle;
+      updateShareableLink();
     }
 
-    // Определение статуса по тестовому баллу
+    function updateShareableLink() {
+      const baseUrl = window.location.origin + window.location.pathname;
+      const keysParam = encodeURIComponent(currentKeys.join(','));
+      const varParam = encodeURIComponent(currentVariantTitle.replace(/^Вариант\s*№?/, ''));
+      shareableLinkInput.value = `${baseUrl}?var=${varParam}&keys=${keysParam}`;
+    }
+
     function getStatusBadge(primaryScore, scaleScore) {
       if (primaryScore === 13) {
         return `<span class="inline-flex items-center gap-1 font-semibold text-emerald-200">★ 100% первой части (72 б.)</span>`;
       } else if (primaryScore >= 11) {
         return `<span class="inline-flex items-center gap-1 font-semibold text-emerald-200">✓ Отличный результат (${scaleScore} б.)</span>`;
       } else if (primaryScore >= PASSING_UNIVERSITY_THRESHOLD) {
-        return `<span class="inline-flex items-center gap-1 font-semibold text-teal-200">✓ Порог для вузов пройден (${scaleScore} б.)</span>`;
+        return `<span class="inline-flex items-center gap-1 font-semibold text-teal-200">✓ Порог вузов пройден (${scaleScore} б.)</span>`;
       } else if (primaryScore >= PASSING_CERTIFICATE_THRESHOLD) {
         return `<span class="inline-flex items-center gap-1 font-semibold text-amber-200">✓ Порог аттестата пройден (${scaleScore} б.)</span>`;
       } else {
@@ -418,59 +593,73 @@
       }
     }
 
-    // Проверка ответов
-    answersForm.addEventListener('submit', (e) => {
+    /* ==========================================================================
+       4. ПРОВЕРКА ОТВЕТОВ И СОХРАНЕНИЕ
+       ========================================================================== */
+    answersForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       validationAlert.classList.add('hidden');
 
       const name = studentNameInput.value.trim();
-      const inputs = document.querySelectorAll('.answer-input');
-      
-      const userAnswers = [];
-      let emptyCount = 0;
-
-      inputs.forEach((inp) => {
-        const val = inp.value.trim();
-        userAnswers.push(val);
-        if (!val) emptyCount++;
-      });
-
-      if (emptyCount > 0) {
-        validationAlertText.textContent = `Внимание: пропущено заданий: ${emptyCount}. Они будут засчитаны как неверные.`;
+      if (!name) {
+        validationAlertText.textContent = 'Пожалуйста, введите ваше имя и фамилию!';
         validationAlert.classList.remove('hidden');
+        studentNameInput.focus();
+        return;
       }
 
-      // Подсчет результатов
-      let primaryScore = 0;
+      const inputs = document.querySelectorAll('.answer-input');
+      const userAnswersObj = {};
       const breakdown = [];
+      const errorDetails = [];
+      let primaryScore = 0;
+      let emptyCount = 0;
 
-      userAnswers.forEach((ans, idx) => {
-        const userNorm = normalizeAnswer(ans);
+      inputs.forEach((inp, idx) => {
+        const val = inp.value.trim();
+        const taskNum = idx + 1;
+        userAnswersObj[taskNum] = val;
+
+        if (!val) emptyCount++;
+
+        const userNorm = normalizeAnswer(val);
         const correctNorm = normalizeAnswer(currentKeys[idx]);
         const isCorrect = userNorm !== '' && userNorm === correctNorm;
 
-        if (isCorrect) primaryScore++;
+        if (isCorrect) {
+          primaryScore++;
+        } else {
+          errorDetails.push({
+            q: taskNum,
+            user: val || '—',
+            key: currentKeys[idx]
+          });
+        }
 
         breakdown.push({
-          taskNum: idx + 1,
-          userAnswer: ans || '—',
+          taskNum,
+          userAnswer: val || '—',
           correctAnswer: currentKeys[idx],
           isCorrect
         });
       });
 
-      // Перевод в тестовый балл (шкала 0-13 -> 0-72)
+      if (emptyCount > 0) {
+        validationAlertText.textContent = `Внимание: пропущено заданий: ${emptyCount}. Они посчитаны как неверные.`;
+        validationAlert.classList.remove('hidden');
+      }
+
       const scaleScore = PRIMARY_TO_SCALE[primaryScore] || 0;
       const percent = Math.round((primaryScore / 13) * 100);
 
-      // Отрисовка результатов
+      // Отрисовка счета
       primaryScoreDisplay.textContent = primaryScore;
       scaleScoreDisplay.textContent = scaleScore;
       percentScoreDisplay.textContent = `${percent}%`;
       progressBar.style.width = `${percent}%`;
       thresholdBadge.innerHTML = getStatusBadge(primaryScore, scaleScore);
 
-      // Генерация карточек детального разбора
+      // Отрисовка списка заданий
       detailedBreakdown.innerHTML = '';
       breakdown.forEach(item => {
         const itemCard = document.createElement('div');
@@ -502,21 +691,217 @@
         detailedBreakdown.appendChild(itemCard);
       });
 
-      // Показ блока
+      // Показываем блок результатов
       resultSection.classList.remove('hidden');
       resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-      // Сохраняем состояние для генерации отчета
+      // Сохраняем объект для отчета
       window.lastReportData = {
-        name: name || 'Ученик',
+        name,
         variant: currentVariantTitle,
         primary: primaryScore,
         scale: scaleScore,
-        breakdown
+        breakdown,
+        errorDetails
       };
+
+      // Сохранение в Supabase
+      await saveAttempt(name, currentVariantTitle, primaryScore, scaleScore, userAnswersObj, errorDetails);
     });
 
-    // Очистить все
+    /* ==========================================================================
+       5. ОТПРАВКА ДАННЫХ В SUPABASE И ЛОКАЛЬНЫЙ РЕЗЕРВ
+       ========================================================================== */
+    async function saveAttempt(name, variant, primary, secondary, answers, errors) {
+      cloudSyncStatus.classList.remove('hidden');
+      cloudStatusDot.className = 'w-2 h-2 rounded-full bg-amber-400 animate-pulse';
+      cloudStatusText.textContent = 'Сохранение работы в журнал преподавателя...';
+      cloudSyncTimestamp.textContent = '';
+
+      const payload = {
+        student_name: name,
+        variant_num: variant,
+        primary_score: primary,
+        secondary_score: secondary,
+        total_questions: 13,
+        answers: answers,
+        errors: errors,
+        created_at: new Date().toISOString()
+      };
+
+      // Всегда дублируем локально в браузер
+      try {
+        const localLogs = JSON.parse(localStorage.getItem('ege_local_attempts') || '[]');
+        localLogs.unshift(payload);
+        localStorage.setItem('ege_local_attempts', JSON.stringify(localLogs.slice(0, 50)));
+      } catch (e) {}
+
+      if (supabaseClient) {
+        try {
+          const { error } = await supabaseClient
+            .from('student_results')
+            .insert([payload]);
+
+          if (error) throw error;
+
+          cloudStatusDot.className = 'w-2 h-2 rounded-full bg-emerald-500';
+          cloudStatusText.textContent = 'Результат успешно доставлен в журнал учителя (Supabase)';
+          cloudSyncTimestamp.textContent = new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+          return;
+        } catch (err) {
+          console.warn('Сбой сохранения в Supabase:', err);
+        }
+      }
+
+      // Если Supabase не настроен или вернул ошибку:
+      cloudStatusDot.className = 'w-2 h-2 rounded-full bg-slate-400';
+      cloudStatusText.textContent = isSupabaseConfigured 
+        ? 'Ошибка сети (результат сохранен в памяти браузера)' 
+        : 'Локальный режим (для сохранения в облако укажите ключи Supabase в коде)';
+      cloudSyncTimestamp.textContent = new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    /* ==========================================================================
+       6. ДАШБОРД ПРЕПОДАВАТЕЛЯ (ЗАГРУЗКА И СТАТИСТИКА)
+       ========================================================================== */
+    async function loadTeacherDashboard() {
+      teacherTableBody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-400">Загрузка данных из журнала...</td></tr>`;
+
+      if (isSupabaseConfigured && supabaseClient) {
+        statDbStatus.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500"></span> Supabase подключен`;
+      } else {
+        statDbStatus.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-400"></span> Локальный демо-режим`;
+      }
+
+      let attempts = [];
+
+      // 1. Пробуем загрузить из Supabase
+      if (supabaseClient) {
+        try {
+          const { data, error } = await supabaseClient
+            .from('student_results')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .limit(50);
+
+          if (!error && data) {
+            attempts = data;
+          }
+        } catch (e) {
+          console.warn('Не удалось прочесть Supabase:', e);
+        }
+      }
+
+      // 2. Если данных нет или Supabase не настроен, берем локальные попытки
+      if (attempts.length === 0) {
+        attempts = JSON.parse(localStorage.getItem('ege_local_attempts') || '[]');
+      }
+
+      statTotalAttempts.textContent = attempts.length;
+
+      if (attempts.length === 0) {
+        statAvgScore.textContent = '0 / 13';
+        teacherTableBody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-400">Пока нет записей сданных работ.</td></tr>`;
+        renderTaskHeatmap({});
+        return;
+      }
+
+      // Расчет среднего балла и тепловой карты ошибок
+      let totalPrimary = 0;
+      const taskErrorCounts = {};
+      for (let i = 1; i <= 13; i++) taskErrorCounts[i] = 0;
+
+      teacherTableBody.innerHTML = attempts.map(row => {
+        totalPrimary += (row.primary_score || 0);
+
+        const dateStr = new Date(row.created_at || Date.now()).toLocaleString('ru-RU', {
+          day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'
+        });
+
+        // Парсинг ошибок
+        const errors = Array.isArray(row.errors) ? row.errors : [];
+        errors.forEach(err => {
+          if (taskErrorCounts[err.q] !== undefined) {
+            taskErrorCounts[err.q]++;
+          }
+        });
+
+        const errorsListHtml = errors.length > 0
+          ? errors.map(err => `
+              <span class="inline-block bg-rose-100 text-rose-800 font-semibold px-1.5 py-0.5 rounded text-[11px] mr-1 mb-1" title="Ответ ученика: ${escapeHtml(err.user)}, Ключ: ${escapeHtml(err.key)}">
+                №${err.q}
+              </span>
+            `).join('')
+          : '<span class="text-emerald-600 font-bold">100% без ошибок</span>';
+
+        return `
+          <tr class="hover:bg-slate-50 transition-colors">
+            <td class="p-3 text-slate-500">${dateStr}</td>
+            <td class="p-3 font-semibold text-slate-900">${escapeHtml(row.student_name)}</td>
+            <td class="p-3 text-slate-600">${escapeHtml(row.variant_num)}</td>
+            <td class="p-3 font-bold text-slate-800">${row.primary_score} / 13</td>
+            <td class="p-3 font-black text-indigo-600">${row.secondary_score} б.</td>
+            <td class="p-3">${errorsListHtml}</td>
+          </tr>
+        `;
+      }).join('');
+
+      const avg = (totalPrimary / attempts.length).toFixed(1);
+      statAvgScore.textContent = `${avg} / 13`;
+
+      renderTaskHeatmap(taskErrorCounts);
+    }
+
+    function renderTaskHeatmap(errorCounts) {
+      taskErrorHeatmap.innerHTML = '';
+      for (let i = 1; i <= 13; i++) {
+        const count = errorCounts[i] || 0;
+        let bg = 'bg-slate-100 text-slate-700 border-slate-200';
+        if (count > 4) {
+          bg = 'bg-rose-500 text-white border-rose-600 font-bold';
+        } else if (count > 2) {
+          bg = 'bg-rose-100 text-rose-800 border-rose-300 font-semibold';
+        } else if (count > 0) {
+          bg = 'bg-amber-100 text-amber-800 border-amber-300';
+        }
+
+        const box = document.createElement('div');
+        box.className = `p-2 rounded-lg border text-center ${bg}`;
+        box.innerHTML = `
+          <div class="text-[10px] uppercase opacity-75">№${i}</div>
+          <div class="text-xs mt-0.5">${count} ош.</div>
+        `;
+        taskErrorHeatmap.appendChild(box);
+      }
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    /* ==========================================================================
+       7. СЛУШАТЕЛИ СОБЫТИЙ И УПРАВЛЕНИЕ
+       ========================================================================== */
+    // Переключение дашборда преподавателя
+    toggleTeacherViewBtn.addEventListener('click', () => {
+      const isHidden = teacherDashboardSection.classList.contains('hidden');
+      if (isHidden) {
+        teacherDashboardSection.classList.remove('hidden');
+        teacherDashboardSection.scrollIntoView({ behavior: 'smooth' });
+        loadTeacherDashboard();
+      } else {
+        teacherDashboardSection.classList.add('hidden');
+      }
+    });
+
+    closeTeacherDashboardBtn.addEventListener('click', () => {
+      teacherDashboardSection.classList.add('hidden');
+    });
+
+    refreshDashboardBtn.addEventListener('click', loadTeacherDashboard);
+
+    // Очистить форму
     clearAllBtn.addEventListener('click', () => {
       document.querySelectorAll('.answer-input').forEach(i => i.value = '');
       studentNameInput.value = '';
@@ -525,31 +910,31 @@
       updateFilledCount();
     });
 
-    // Копирование отчета для учителя
+    // Копирование отчета для Telegram
     copyReportBtn.addEventListener('click', () => {
       if (!window.lastReportData) return;
       const data = window.lastReportData;
 
-      const correctTasks = data.breakdown.filter(t => t.isCorrect).map(t => t.taskNum);
-      const wrongTasks = data.breakdown.filter(t => !t.isCorrect).map(t => `${t.taskNum} (отв: ${t.userAnswer})`);
+      const correctList = data.breakdown.filter(t => t.isCorrect).map(t => t.taskNum);
+      const wrongList = data.errorDetails.map(t => `№${t.q} (ввел: ${t.user})`);
 
-      const text = `📊 Результат пробника ЕГЭ (Математика Профиль)
+      const text = `📊 Пробник ЕГЭ (Математика Профиль) — Часть 1
 👤 Ученик: ${data.name}
 📋 ${data.variant}
 
 🎯 Первичный балл: ${data.primary} / 13
 🔥 Вторичный балл: ${data.scale} / 72
 
-✅ Верно [${correctTasks.length}]: ${correctTasks.length ? correctTasks.join(', ') : 'нет'}
-❌ Ошибки [${wrongTasks.length}]: ${wrongTasks.length ? wrongTasks.join('; ') : 'нет'}
+✅ Верно (${correctList.length}): ${correctList.length ? correctList.join(', ') : 'нет'}
+❌ Ошибки (${wrongList.length}): ${wrongList.length ? wrongList.join('; ') : 'нет'}
 `;
 
-      const textarea = document.createElement('textarea');
-      textarea.value = text;
-      textarea.style.position = 'fixed';
-      textarea.style.opacity = '0';
-      document.body.appendChild(textarea);
-      textarea.select();
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
       try {
         document.execCommand('copy');
         copyNotice.classList.remove('hidden');
@@ -557,13 +942,14 @@
       } catch (err) {
         console.error(err);
       }
-      document.body.removeChild(textarea);
+      document.body.removeChild(ta);
     });
 
-    // Модальное окно преподавателя
+    // Модалка настройки ключей
     openTeacherModalBtn.addEventListener('click', () => {
       teacherVariantName.value = currentVariantTitle;
       teacherKeysInput.value = currentKeys.join(', ');
+      updateShareableLink();
       teacherModal.classList.remove('hidden');
     });
 
@@ -576,8 +962,7 @@
       const parsed = rawText.split(/[,\s]+/).map(s => s.trim()).filter(Boolean);
 
       if (parsed.length !== 13) {
-        validationAlertText.textContent = `Нужно ввести ровно 13 ответов! Сейчас введено: ${parsed.length}`;
-        validationAlert.classList.remove('hidden');
+        alert(`Нужно ввести ровно 13 ответов! Сейчас введено: ${parsed.length}`);
         return;
       }
 
@@ -588,6 +973,7 @@
       localStorage.setItem('ege_math_variant_title_13', currentVariantTitle);
 
       variantBadge.textContent = currentVariantTitle;
+      updateShareableLink();
       teacherModal.classList.add('hidden');
       resultSection.classList.add('hidden');
     });
@@ -600,12 +986,28 @@
       localStorage.removeItem('ege_math_keys_13');
       localStorage.removeItem('ege_math_variant_title_13');
       variantBadge.textContent = currentVariantTitle;
+      updateShareableLink();
     });
 
-    // Старт
-    loadKeysAndVariant();
-    renderInputGrid();
-    updateFilledCount();
+    copyShareLinkBtn.addEventListener('click', () => {
+      shareableLinkInput.select();
+      document.execCommand('copy');
+      copyShareLinkBtn.textContent = '✓ Скопировано!';
+      setTimeout(() => copyShareLinkBtn.textContent = 'Копировать ссылку', 2500);
+    });
+
+    // Активация панели учителя, если в ссылке есть ?teacher=1 или ?admin=true
+    window.addEventListener('DOMContentLoaded', () => {
+      loadKeysAndVariant();
+      renderInputGrid();
+      updateFilledCount();
+
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('teacher') === '1' || urlParams.get('admin') === 'true') {
+        teacherDashboardSection.classList.remove('hidden');
+        loadTeacherDashboard();
+      }
+    });
   </script>
 </body>
 </html>
