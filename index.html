@@ -343,7 +343,7 @@
             id="teacherKeysInput" 
             rows="3" 
             class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm font-mono focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 placeholder:text-slate-300"
-            placeholder="4, 16, 0.5, 6, 2, 15, 0.25, 8, -3, 12, 5, -1, 14"
+            placeholder="6, 10, 60, 0.92, 0.02, 55, 58, -1.5, 4, 1.2, 16, 26.5, 6409000"
           ></textarea>
         </div>
 
@@ -385,16 +385,12 @@
   <script>
     /* ==========================================================================
        1. КОНФИГУРАЦИЯ БАЗЫ ДАННЫХ SUPABASE
-       Вставьте сюда URL и Anon Key из настроек вашего проекта Supabase:
-       Project Settings -> API -> Project URL & Project API Keys (anon public)
        ========================================================================== */
     const SUPABASE_URL = 'https://ioswqaurllohiokvjxjh.supabase.co';
+    // ВСТАВЬТЕ СЮДА ВАШ АНОНИМНЫЙ КЛЮЧ (anon public) ИЗ SUPABASE:
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlvc3dxYXVybGxvaGlva3ZqeGpoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEwMTIxMDIsImV4cCI6MjEwNjU4ODEwMn0.TifObaD1hsyog69RO_R8mJEQljgg9gj-SNIO-h6Z3m4';
 
-    // Проверка, заполнены ли реальные ключи (иначе включается безопасный локальный режим)
-    const isSupabaseConfigured = 
-      SUPABASE_URL !== 'https://ioswqaurllohiokvjxjh.supabase.co' && 
-      SUPABASE_ANON_KEY !== 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlvc3dxYXVybGxvaGlva3ZqeGpoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEwMTIxMDIsImV4cCI6MjEwNjU4ODEwMn0.TifObaD1hsyog69RO_R8mJEQljgg9gj-SNIO-h6Z3m4';
+    const isSupabaseConfigured = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY && SUPABASE_ANON_KEY.trim() !== '');
 
     let supabaseClient = null;
     if (isSupabaseConfigured && window.supabase) {
@@ -408,14 +404,12 @@
     /* ==========================================================================
        2. ШКАЛА ПЕРЕВОДА И КЛЮЧИ ПО УМОЛЧАНИЮ (13 ЗАДАНИЙ)
        ========================================================================== */
-    // Индекс в массиве = первичный балл (0..13)
-    // Значение = вторичный (тестовый) балл ФИПИ
     const PRIMARY_TO_SCALE = [0, 6, 11, 17, 22, 27, 34, 40, 46, 52, 58, 64, 70, 72];
-    const PASSING_CERTIFICATE_THRESHOLD = 5; // 27 баллов (порог аттестата)
-    const PASSING_UNIVERSITY_THRESHOLD = 7;  // 40 баллов (порог вузов)
+    const PASSING_CERTIFICATE_THRESHOLD = 5; // 27 баллов
+    const PASSING_UNIVERSITY_THRESHOLD = 7;  // 40 баллов
 
-    // Ключи по умолчанию для пробника (13 штук)
-    const DEFAULT_KEYS = ["4", "16", "0.5", "6", "2", "15", "0.25", "8", "-3", "12", "5", "-1", "14"];
+    // Ключи по умолчанию для Варианта №1
+    const DEFAULT_KEYS = ["6", "10", "60", "0.92", "0.02", "55", "58", "-1.5", "4", "1.2", "16", "26.5", "6409000"];
     let currentKeys = [...DEFAULT_KEYS];
     let currentVariantTitle = "Вариант №1";
 
@@ -471,19 +465,17 @@
     /* ==========================================================================
        3. ФУНКЦИИ НОРМАЛИЗАЦИИ И ПОДГОТОВКИ
        ========================================================================== */
-    // Приводим пользовательский ввод к чистому числовому виду (запятые -> точки, удаление пробелов)
     function normalizeAnswer(val) {
       if (typeof val !== 'string') val = String(val || '');
       let clean = val.trim().replace(/\s+/g, '').replace(',', '.');
       if (clean === '') return '';
       const num = Number(clean);
       if (!isNaN(num) && clean !== '.' && clean !== '-') {
-        return String(num); // 0.50 -> "0.5"
+        return String(num);
       }
       return clean.toLowerCase();
     }
 
-    // Рендер полей 1–13
     function renderInputGrid() {
       inputsGrid.innerHTML = '';
       for (let i = 1; i <= 13; i++) {
@@ -506,7 +498,6 @@
         inputsGrid.appendChild(card);
       }
 
-      // Слушатели на ввод и навигацию по клавишам
       const inputs = document.querySelectorAll('.answer-input');
       inputs.forEach((input, index) => {
         input.addEventListener('input', updateFilledCount);
@@ -536,7 +527,6 @@
       filledCounter.textContent = `Заполнено: ${count} / 13`;
     }
 
-    // Загрузка ключей и варианта из URL параметров или localStorage
     function loadKeysAndVariant() {
       const params = new URLSearchParams(window.location.search);
       const urlKeys = params.get('keys');
@@ -594,7 +584,7 @@
     }
 
     /* ==========================================================================
-       4. ПРОВЕРКА ОТВЕТОВ И СОХРАНЕНИЕ
+       4. ПРОВЕРКА ОТВЕТОВ
        ========================================================================== */
     answersForm.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -652,14 +642,12 @@
       const scaleScore = PRIMARY_TO_SCALE[primaryScore] || 0;
       const percent = Math.round((primaryScore / 13) * 100);
 
-      // Отрисовка счета
       primaryScoreDisplay.textContent = primaryScore;
       scaleScoreDisplay.textContent = scaleScore;
       percentScoreDisplay.textContent = `${percent}%`;
       progressBar.style.width = `${percent}%`;
       thresholdBadge.innerHTML = getStatusBadge(primaryScore, scaleScore);
 
-      // Отрисовка списка заданий
       detailedBreakdown.innerHTML = '';
       breakdown.forEach(item => {
         const itemCard = document.createElement('div');
@@ -691,11 +679,9 @@
         detailedBreakdown.appendChild(itemCard);
       });
 
-      // Показываем блок результатов
       resultSection.classList.remove('hidden');
       resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-      // Сохраняем объект для отчета
       window.lastReportData = {
         name,
         variant: currentVariantTitle,
@@ -705,12 +691,11 @@
         errorDetails
       };
 
-      // Сохранение в Supabase
       await saveAttempt(name, currentVariantTitle, primaryScore, scaleScore, userAnswersObj, errorDetails);
     });
 
     /* ==========================================================================
-       5. ОТПРАВКА ДАННЫХ В SUPABASE И ЛОКАЛЬНЫЙ РЕЗЕРВ
+       5. ОТПРАВКА ДАННЫХ В SUPABASE
        ========================================================================== */
     async function saveAttempt(name, variant, primary, secondary, answers, errors) {
       cloudSyncStatus.classList.remove('hidden');
@@ -721,48 +706,54 @@
       const payload = {
         student_name: name,
         variant_num: variant,
-        primary_score: primary,
-        secondary_score: secondary,
+        primary_score: Number(primary),
+        secondary_score: Number(secondary),
         total_questions: 13,
         answers: answers,
         errors: errors,
         created_at: new Date().toISOString()
       };
 
-      // Всегда дублируем локально в браузер
+      // Локальный кэш
       try {
         const localLogs = JSON.parse(localStorage.getItem('ege_local_attempts') || '[]');
         localLogs.unshift(payload);
         localStorage.setItem('ege_local_attempts', JSON.stringify(localLogs.slice(0, 50)));
       } catch (e) {}
 
-      if (supabaseClient) {
-        try {
-          const { error } = await supabaseClient
-            .from('student_results')
-            .insert([payload]);
-
-          if (error) throw error;
-
-          cloudStatusDot.className = 'w-2 h-2 rounded-full bg-emerald-500';
-          cloudStatusText.textContent = 'Результат успешно доставлен в журнал учителя (Supabase)';
-          cloudSyncTimestamp.textContent = new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
-          return;
-        } catch (err) {
-          console.warn('Сбой сохранения в Supabase:', err);
-        }
+      // Проверка ключа перед отправкой
+      if (!isSupabaseConfigured || !supabaseClient) {
+        alert('⚠️ Внимание:\nВ строке 325 не указан SUPABASE_ANON_KEY!\nДанные сейчас сохранились только в браузере.');
+        cloudStatusDot.className = 'w-2 h-2 rounded-full bg-slate-400';
+        cloudStatusText.textContent = 'Ключ Supabase не заполнен (локальный режим)';
+        return;
       }
 
-      // Если Supabase не настроен или вернул ошибку:
-      cloudStatusDot.className = 'w-2 h-2 rounded-full bg-slate-400';
-      cloudStatusText.textContent = isSupabaseConfigured 
-        ? 'Ошибка сети (результат сохранен в памяти браузера)' 
-        : 'Локальный режим (для сохранения в облако укажите ключи Supabase в коде)';
-      cloudSyncTimestamp.textContent = new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+      try {
+        const { data, error } = await supabaseClient
+          .from('student_results')
+          .insert([payload]);
+
+        if (error) {
+          alert('❌ Ошибка ответа Supabase:\n' + error.message + '\nДетали: ' + (error.details || error.hint || 'Проверьте таблицу'));
+          cloudStatusDot.className = 'w-2 h-2 rounded-full bg-rose-500';
+          cloudStatusText.textContent = 'Ошибка Supabase: ' + error.message;
+          return;
+        }
+
+        cloudStatusDot.className = 'w-2 h-2 rounded-full bg-emerald-500';
+        cloudStatusText.textContent = 'Результат успешно доставлен в Supabase!';
+        cloudSyncTimestamp.textContent = new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+
+      } catch (err) {
+        alert('💥 Ошибка соединения с сервером:\n' + err.message);
+        cloudStatusDot.className = 'w-2 h-2 rounded-full bg-rose-500';
+        cloudStatusText.textContent = 'Сетевой сбой при отправке';
+      }
     }
 
     /* ==========================================================================
-       6. ДАШБОРД ПРЕПОДАВАТЕЛЯ (ЗАГРУЗКА И СТАТИСТИКА)
+       6. ДАШБОРД ПРЕПОДАВАТЕЛЯ
        ========================================================================== */
     async function loadTeacherDashboard() {
       teacherTableBody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-400">Загрузка данных из журнала...</td></tr>`;
@@ -770,12 +761,11 @@
       if (isSupabaseConfigured && supabaseClient) {
         statDbStatus.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500"></span> Supabase подключен`;
       } else {
-        statDbStatus.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-400"></span> Локальный демо-режим`;
+        statDbStatus.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-400"></span> Локальный режим (нет ключа)`;
       }
 
       let attempts = [];
 
-      // 1. Пробуем загрузить из Supabase
       if (supabaseClient) {
         try {
           const { data, error } = await supabaseClient
@@ -786,13 +776,14 @@
 
           if (!error && data) {
             attempts = data;
+          } else if (error) {
+            console.error('Ошибка чтения Supabase:', error);
           }
         } catch (e) {
-          console.warn('Не удалось прочесть Supabase:', e);
+          console.warn('Сбой чтения Supabase:', e);
         }
       }
 
-      // 2. Если данных нет или Supabase не настроен, берем локальные попытки
       if (attempts.length === 0) {
         attempts = JSON.parse(localStorage.getItem('ege_local_attempts') || '[]');
       }
@@ -806,7 +797,6 @@
         return;
       }
 
-      // Расчет среднего балла и тепловой карты ошибок
       let totalPrimary = 0;
       const taskErrorCounts = {};
       for (let i = 1; i <= 13; i++) taskErrorCounts[i] = 0;
@@ -818,7 +808,6 @@
           day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'
         });
 
-        // Парсинг ошибок
         const errors = Array.isArray(row.errors) ? row.errors : [];
         errors.forEach(err => {
           if (taskErrorCounts[err.q] !== undefined) {
@@ -826,7 +815,7 @@
           }
         });
 
-        const errorsListHtml = errors.length > 0
+        const errorsListHtml = errors.length > 0 
           ? errors.map(err => `
               <span class="inline-block bg-rose-100 text-rose-800 font-semibold px-1.5 py-0.5 rounded text-[11px] mr-1 mb-1" title="Ответ ученика: ${escapeHtml(err.user)}, Ключ: ${escapeHtml(err.key)}">
                 №${err.q}
@@ -881,9 +870,8 @@
     }
 
     /* ==========================================================================
-       7. СЛУШАТЕЛИ СОБЫТИЙ И УПРАВЛЕНИЕ
+       7. УПРАВЛЕНИЕ
        ========================================================================== */
-    // Переключение дашборда преподавателя
     toggleTeacherViewBtn.addEventListener('click', () => {
       const isHidden = teacherDashboardSection.classList.contains('hidden');
       if (isHidden) {
@@ -901,7 +889,6 @@
 
     refreshDashboardBtn.addEventListener('click', loadTeacherDashboard);
 
-    // Очистить форму
     clearAllBtn.addEventListener('click', () => {
       document.querySelectorAll('.answer-input').forEach(i => i.value = '');
       studentNameInput.value = '';
@@ -910,7 +897,6 @@
       updateFilledCount();
     });
 
-    // Копирование отчета для Telegram
     copyReportBtn.addEventListener('click', () => {
       if (!window.lastReportData) return;
       const data = window.lastReportData;
@@ -945,7 +931,6 @@
       document.body.removeChild(ta);
     });
 
-    // Модалка настройки ключей
     openTeacherModalBtn.addEventListener('click', () => {
       teacherVariantName.value = currentVariantTitle;
       teacherKeysInput.value = currentKeys.join(', ');
@@ -996,7 +981,6 @@
       setTimeout(() => copyShareLinkBtn.textContent = 'Копировать ссылку', 2500);
     });
 
-    // Активация панели учителя, если в ссылке есть ?teacher=1 или ?admin=true
     window.addEventListener('DOMContentLoaded', () => {
       loadKeysAndVariant();
       renderInputGrid();
