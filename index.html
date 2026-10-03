@@ -255,18 +255,19 @@
   <!-- Футер -->
   <footer class="bg-white border-t border-slate-200 py-4 mt-8">
     <div class="max-w-4xl mx-auto px-4 text-center text-xs text-slate-400">
-      Шкала перевода баллов соответствует спецификации ФИПИ для 1-й части профильного ЕГЭ.
+      Шкала перевода баллов соответствует спецификации ФИПИ для 1-й части профильного ЕГЭ (13 заданий).
     </div>
   </footer>
 
   <script>
-    // Официальная шкала перевода первой части профильного ЕГЭ:
-    // Индекс массива соответствует первичному баллу (0 - 12)
-    const PRIMARY_TO_SCALE = [0, 6, 11, 17, 22, 27, 34, 40, 46, 52, 58, 64, 70];
-    const PASSING_PRIMARY_THRESHOLD = 5; // 27 тестовых баллов
+    // Официальная шкала перевода первой части профильного ЕГЭ для 13 заданий:
+    // Индекс массива соответствует первичному баллу (0 - 13)
+    const PRIMARY_TO_SCALE = [0, 6, 11, 17, 22, 27, 34, 40, 46, 52, 58, 64, 70, 72];
+    const PASSING_CERTIFICATE_THRESHOLD = 5; // 27 баллов (порог сдачи на аттестат)
+    const PASSING_UNIVERSITY_THRESHOLD = 7;  // 40 баллов (порог Минобрнауки для вузов)
 
-    // Эталонные ответы по умолчанию (демо-вариант)
-    const DEFAULT_KEYS = ["4", "16", "0.5", "6", "2", "15", "0.25", "8", "-3", "12", "5", "-1"];
+    // Эталонные ответы по умолчанию для 13 заданий
+    const DEFAULT_KEYS = ["4", "16", "0.5", "6", "2", "15", "0.25", "8", "-3", "12", "5", "-1", "14"];
     let currentKeys = [...DEFAULT_KEYS];
     let currentVariantTitle = "Вариант №1";
 
@@ -305,7 +306,7 @@
       if (typeof val !== 'string') val = String(val || '');
       let clean = val.trim().replace(/\s+/g, '').replace(',', '.');
       if (clean === '') return '';
-      // Если это валидное число, приводим к каноническому виду (убираем лишние нули: 0.50 -> 0.5)
+      // Если это валидное число, приводим к каноническому виду (убираем незначащие нули: 0.50 -> 0.5)
       const num = Number(clean);
       if (!isNaN(num) && clean !== '.' && clean !== '-') {
         return String(num);
@@ -313,10 +314,10 @@
       return clean.toLowerCase();
     }
 
-    // Инициализация полей 1–12 в бланке
+    // Инициализация полей 1–13 в бланке
     function renderInputGrid() {
       inputsGrid.innerHTML = '';
-      for (let i = 1; i <= 12; i++) {
+      for (let i = 1; i <= 13; i++) {
         const card = document.createElement('div');
         card.className = "p-3 rounded-xl border border-slate-200 bg-slate-50/50 hover:border-slate-300 transition-colors focus-within:border-indigo-500 focus-within:bg-white focus-within:ring-2 focus-within:ring-indigo-500/10";
         card.innerHTML = `
@@ -336,10 +337,24 @@
         inputsGrid.appendChild(card);
       }
 
-      // Слушатели на автоформат и счетчик
+      // Слушатели на автоформат, счетчик и навигацию
       const inputs = document.querySelectorAll('.answer-input');
-      inputs.forEach(input => {
+      inputs.forEach((input, index) => {
         input.addEventListener('input', updateFilledCount);
+        input.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            if (index + 1 < inputs.length) {
+              inputs[index + 1].focus();
+            } else {
+              answersForm.requestSubmit();
+            }
+          } else if (e.key === 'ArrowRight' && input.selectionStart === input.value.length) {
+            if (index + 1 < inputs.length) inputs[index + 1].focus();
+          } else if (e.key === 'ArrowLeft' && input.selectionEnd === 0) {
+            if (index - 1 >= 0) inputs[index - 1].focus();
+          }
+        });
       });
     }
 
@@ -350,7 +365,7 @@
       inputs.forEach(inp => {
         if (inp.value.trim() !== '') count++;
       });
-      filledCounter.textContent = `Заполнено: ${count} / 12`;
+      filledCounter.textContent = `Заполнено: ${count} / 13`;
     }
 
     // Загрузка настроек (из URL параметров или localStorage)
@@ -361,15 +376,15 @@
 
       if (urlKeys) {
         const parsed = urlKeys.split(',').map(s => s.trim()).filter(Boolean);
-        if (parsed.length === 12) {
+        if (parsed.length === 13) {
           currentKeys = parsed;
         }
       } else {
-        const savedKeys = localStorage.getItem('ege_math_keys');
+        const savedKeys = localStorage.getItem('ege_math_keys_13');
         if (savedKeys) {
           try {
             const parsed = JSON.parse(savedKeys);
-            if (Array.isArray(parsed) && parsed.length === 12) {
+            if (Array.isArray(parsed) && parsed.length === 13) {
               currentKeys = parsed;
             }
           } catch (e) {}
@@ -379,13 +394,28 @@
       if (urlVar) {
         currentVariantTitle = `Вариант №${urlVar}`;
       } else {
-        const savedTitle = localStorage.getItem('ege_math_variant_title');
+        const savedTitle = localStorage.getItem('ege_math_variant_title_13');
         if (savedTitle) {
           currentVariantTitle = savedTitle;
         }
       }
 
       variantBadge.textContent = currentVariantTitle;
+    }
+
+    // Определение статуса по тестовому баллу
+    function getStatusBadge(primaryScore, scaleScore) {
+      if (primaryScore === 13) {
+        return `<span class="inline-flex items-center gap-1 font-semibold text-emerald-200">★ 100% первой части (72 б.)</span>`;
+      } else if (primaryScore >= 11) {
+        return `<span class="inline-flex items-center gap-1 font-semibold text-emerald-200">✓ Отличный результат (${scaleScore} б.)</span>`;
+      } else if (primaryScore >= PASSING_UNIVERSITY_THRESHOLD) {
+        return `<span class="inline-flex items-center gap-1 font-semibold text-teal-200">✓ Порог для вузов пройден (${scaleScore} б.)</span>`;
+      } else if (primaryScore >= PASSING_CERTIFICATE_THRESHOLD) {
+        return `<span class="inline-flex items-center gap-1 font-semibold text-amber-200">✓ Порог аттестата пройден (${scaleScore} б.)</span>`;
+      } else {
+        return `<span class="inline-flex items-center gap-1 font-semibold text-rose-200">⚠ Порог не пройден (нужно от 27 б.)</span>`;
+      }
     }
 
     // Проверка ответов
@@ -399,13 +429,12 @@
       const userAnswers = [];
       let emptyCount = 0;
 
-      inputs.forEach((inp, idx) => {
+      inputs.forEach((inp) => {
         const val = inp.value.trim();
         userAnswers.push(val);
         if (!val) emptyCount++;
       });
 
-      // Мягкое предупреждение о пустых полях
       if (emptyCount > 0) {
         validationAlertText.textContent = `Внимание: пропущено заданий: ${emptyCount}. Они будут засчитаны как неверные.`;
         validationAlert.classList.remove('hidden');
@@ -430,22 +459,16 @@
         });
       });
 
-      // Перевод в тестовый балл
+      // Перевод в тестовый балл (шкала 0-13 -> 0-72)
       const scaleScore = PRIMARY_TO_SCALE[primaryScore] || 0;
-      const percent = Math.round((primaryScore / 12) * 100);
+      const percent = Math.round((primaryScore / 13) * 100);
 
       // Отрисовка результатов
       primaryScoreDisplay.textContent = primaryScore;
       scaleScoreDisplay.textContent = scaleScore;
       percentScoreDisplay.textContent = `${percent}%`;
       progressBar.style.width = `${percent}%`;
-
-      // Статус порога
-      if (primaryScore >= PASSING_PRIMARY_THRESHOLD) {
-        thresholdBadge.innerHTML = `<span class="inline-flex items-center gap-1 font-semibold text-emerald-200">✓ Порог пройден (мин. 27 баллов)</span>`;
-      } else {
-        thresholdBadge.innerHTML = `<span class="inline-flex items-center gap-1 font-semibold text-rose-200">⚠ Порог не набран (нужно от 27 б.)</span>`;
-      }
+      thresholdBadge.innerHTML = getStatusBadge(primaryScore, scaleScore);
 
       // Генерация карточек детального разбора
       detailedBreakdown.innerHTML = '';
@@ -514,14 +537,13 @@
 👤 Ученик: ${data.name}
 📋 ${data.variant}
 
-🎯 Первичный балл: ${data.primary} / 12
-🔥 Вторичный балл: ${data.scale} / 70
+🎯 Первичный балл: ${data.primary} / 13
+🔥 Вторичный балл: ${data.scale} / 72
 
 ✅ Верно [${correctTasks.length}]: ${correctTasks.length ? correctTasks.join(', ') : 'нет'}
 ❌ Ошибки [${wrongTasks.length}]: ${wrongTasks.length ? wrongTasks.join('; ') : 'нет'}
 `;
 
-      // Надежное копирование без внешних зависимостей
       const textarea = document.createElement('textarea');
       textarea.value = text;
       textarea.style.position = 'fixed';
@@ -533,7 +555,7 @@
         copyNotice.classList.remove('hidden');
         setTimeout(() => copyNotice.classList.add('hidden'), 4000);
       } catch (err) {
-        alert('Не удалось скопировать. Пожалуйста, выделите текст вручную.');
+        console.error(err);
       }
       document.body.removeChild(textarea);
     });
@@ -553,21 +575,20 @@
       const rawText = teacherKeysInput.value;
       const parsed = rawText.split(/[,\s]+/).map(s => s.trim()).filter(Boolean);
 
-      if (parsed.length !== 12) {
-        alert(`Нужно ввести ровно 12 ответов! Сейчас введено: ${parsed.length}`);
+      if (parsed.length !== 13) {
+        validationAlertText.textContent = `Нужно ввести ровно 13 ответов! Сейчас введено: ${parsed.length}`;
+        validationAlert.classList.remove('hidden');
         return;
       }
 
       currentKeys = parsed;
       currentVariantTitle = teacherVariantName.value.trim() || 'Вариант №1';
 
-      localStorage.setItem('ege_math_keys', JSON.stringify(currentKeys));
-      localStorage.setItem('ege_math_variant_title', currentVariantTitle);
+      localStorage.setItem('ege_math_keys_13', JSON.stringify(currentKeys));
+      localStorage.setItem('ege_math_variant_title_13', currentVariantTitle);
 
       variantBadge.textContent = currentVariantTitle;
       teacherModal.classList.add('hidden');
-      
-      // Сброс результатов проверки при смене ключей
       resultSection.classList.add('hidden');
     });
 
@@ -576,8 +597,8 @@
       currentVariantTitle = "Вариант №1";
       teacherVariantName.value = currentVariantTitle;
       teacherKeysInput.value = currentKeys.join(', ');
-      localStorage.removeItem('ege_math_keys');
-      localStorage.removeItem('ege_math_variant_title');
+      localStorage.removeItem('ege_math_keys_13');
+      localStorage.removeItem('ege_math_variant_title_13');
       variantBadge.textContent = currentVariantTitle;
     });
 
